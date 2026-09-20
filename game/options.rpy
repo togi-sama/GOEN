@@ -4,6 +4,7 @@
 ## them. Lines beginning with a single '#' mark are commented-out code, and you
 ## may want to uncomment them when appropriate.
 
+## TODO: Please replace all of these fields before you relase your game!
 
 ## Basics ######################################################################
 
@@ -22,22 +23,34 @@ define gui.show_name = True
 
 
 ## The version of the game.
-
-define config.version = "1.0"
+### Please remember to change this for your game!
+define config.version = "2.7"
 
 
 ## Text that is placed on the game's about screen. Place the text between the
 ## triple-quotes, and leave a blank line between paragraphs.
 
-define gui.about = _p("""
+define gui.about = _p("""This Ren'Py GUI Template was put together by BáiYù with additional
+    code by {a=https://bobcgames.itch.io/}bobcgames{/a}, {a=https://twitter.com/theominute}TheoMinute{/a} and {a=https://npckc.itch.io}npckc{/a}.
+    This release is under a {a=https://opensource.org/licenses/MIT}MIT license{/a},
+    meaning you may modify and use this code in any games you make, even
+    commercial ones. You do not to need to ask permission from me, bobcgames, minute, or npckc
+    to use the code in this project, though credit to us all is highly appreciated. If you wish to use the visual and audio
+    assets in your game, please refer to those individual licenses.
+    \nEileen Sprite made with {a=https://ar14.itch.io/mannequin}Mannequin by AR14{/a}
+    \nBackgrounds made by {a=https://lemmasoft.renai.us/forums/viewtopic.php?f=52&t=17302}mugenjohncel{/a}
+    \nMusic composed by {a=https://soundimage.org/}Eric Matyas{/a}
+    \nIf you'd like to see more free Ren'Py codes and GUIs in the future or
+    support the other things I do, consider leaving a tip on the itch.io page!
+    \nThis template was last updated on May 25, 2024, tested on both Ren'Py Version 7.7.1 and Version 8.2.1.
+    \n(From here on, it's the boilerplate text that's in screens.rpy!)
 """)
-
 
 ## A short name for the game used for executables and directories in the built
 ## distribution. This must be ASCII-only, and must not contain spaces, colons,
 ## or semicolons.
 
-define build.name = "GOEN"
+define build.name = "AIO-GUI-Template"
 
 
 ## Sounds and music ############################################################
@@ -62,7 +75,7 @@ define config.has_voice = True
 ## the player is at the main menu. This file will continue playing into the
 ## game, until it is stopped or another file is played.
 
-# define config.main_menu_music = "main-menu-theme.ogg"
+define config.main_menu_music = concrete
 
 
 ## Transitions #################################################################
@@ -84,16 +97,21 @@ define config.intra_transition = dissolve
 
 ## A transition that is used after a game has been loaded.
 
-define config.after_load_transition = None
+define config.after_load_transition = dissolve
 
 
 ## Used when entering the main menu after the game has ended.
 
-define config.end_game_transition = None
+define config.end_game_transition = dissolve
 
 
 ## A variable to set the transition used when the game starts does not exist.
 ## Instead, use a with statement after showing the initial scene.
+
+
+## A transition for images changed while using say attributes
+
+define config.say_attribute_transition = dissolve
 
 
 ## Window management ###########################################################
@@ -120,13 +138,20 @@ define config.window_hide_transition = Dissolve(.2)
 ## Controls the default text speed. The default, 0, is infinite, while any other
 ## number is the number of characters per second to type out.
 
-default preferences.text_cps = 0
+default preferences.text_cps = 45
 
 
 ## The default auto-forward delay. Larger numbers lead to longer waits, with 0
 ## to 30 being the valid range.
 
 default preferences.afm_time = 15
+
+
+## The default volume for the audio channels.
+
+define config.default_music_volume = 0.6
+define config.default_sfx_volume = 0.7
+define config.default_voice_volume = 0.7
 
 
 ## Save directory ##############################################################
@@ -143,7 +168,7 @@ default preferences.afm_time = 15
 ## This generally should not be changed, and if it is, should always be a
 ## literal string, not an expression.
 
-define config.save_directory = "GOEN-1789784030"
+define config.save_directory = "AIOGUITemplate-1658355779"
 
 
 ## Icon ########################################################################
@@ -188,6 +213,12 @@ init python:
 
     # build.classify('game/**.png', 'archive')
     # build.classify('game/**.jpg', 'archive')
+    # build.classify('game/**.webp', 'archive')
+    # build.classify('game/**.webm', 'archive')
+    # build.classify('game/**.ogg', 'archive')
+    # build.classify('game/**.mp3', 'archive')
+    # build.classify('game/**.rpy', 'archive')
+    # build.classify('game/**.rpyc', 'archive')
 
     ## Files matching documentation patterns are duplicated in a mac app build,
     ## so they appear in both the app and the zip file.
@@ -196,9 +227,9 @@ init python:
     build.documentation('*.txt')
 
 
-## A Google Play license key is required to perform in-app purchases. It can be
-## found in the Google Play developer console, under "Monetize" > "Monetization
-## Setup" > "Licensing".
+## A Google Play license key is required to download expansion files and perform
+## in-app purchases. It can be found on the "Services & APIs" page of the Google
+## Play developer console.
 
 # define build.google_play_key = "..."
 
