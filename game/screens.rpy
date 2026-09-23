@@ -105,7 +105,8 @@ screen say(who, what):
 
     window:
 
-        background Transform(style.window.background, alpha=persistent.say_window_alpha)
+        background Transform("gui/textbox_gradient.png", xysize = (1280, 185), alpha = 1.0)
+
         ### IMPORTANT: The Transform() is holding the window background, and the alpha variable ties to our say window alpha
 
         id "window"
@@ -134,7 +135,7 @@ init python:
     config.character_id_prefixes.append('namebox')
 
 ## Control the opacity of the textbox
-default persistent.say_window_alpha = 0.75
+default persistent.say_window_alpha = 1.0
 
 style window is default
 style say_label is default
@@ -150,8 +151,7 @@ style window:
     xfill True
     yalign gui.textbox_yalign
     ysize gui.textbox_height
-
-    background Image("gui/textbox.png", xalign=0.5, yalign=1.0)
+    background "gui/text box.png"
 
 style namebox:
     xpos gui.name_xpos
@@ -165,13 +165,13 @@ style namebox:
 
 style say_label:
     properties gui.text_properties("name", accent=True)
-    font "gui/font/Hashiba.ttf"
+    font "gui/font/baskervville.regular.ttf"
     xalign gui.name_xalign
     yalign 0.5
 
 style say_dialogue:
     properties gui.text_properties("dialogue")
-    font "gui/font/Hashiba.ttf"
+    font "gui/font/baskervville.regular.ttf"
     xpos gui.dialogue_xpos
     xsize gui.dialogue_width
     ypos gui.dialogue_ypos
@@ -343,6 +343,7 @@ screen navigation():
         if main_menu:
 
             textbutton _("Extras") action ShowMenu("bobcachievements") alt "Extras"
+            textbutton _("Image Tools") action ShowMenu("image_tools")
 
         if renpy.variant("pc"):
 
@@ -1457,14 +1458,14 @@ screen bubble(who, what):
     window:
         id "window"
 
+        vbox:
+            spacing 5
+            xfill True
+
         if who is not None:
-
-            window:
-                id "namebox"
-                style "bubble_namebox"
-
-                text who:
-                    id "who"
+            text who:
+                id "who"
+                style "bubble_who"
 
         text what:
             id "what"
@@ -1483,42 +1484,47 @@ style bubble_namebox:
     xalign 0.5
 
 style bubble_who:
-    xalign 0.5
-    textalign 0.5
-    color "#000"
+    xalign 0.0
+    textalign 0.0
+    yoffset -35
+    size 25
+    color "#f5f5f5"
+    font "gui/font/baskervville.regular.ttf"
 
 style bubble_what:
-    align (0.5, 0.5)
+    xalign 0.5
     text_align 0.5
     layout "subtitle"
-    color "#000"
+    color "#f5f5f5"
+    font "gui/font/baskervville.regular.ttf"
 
-define bubble.frame = Frame("gui/bubble.png", 55, 55, 55, 95)
+
+define bubble.frame = Frame("gui/text box.png", 55, 55, 55, 95)
 define bubble.thoughtframe = Frame("gui/thoughtbubble.png", 55, 55, 55, 55)
 
 define bubble.properties = {
     "bottom_left" : {
-        "window_background" : Transform(bubble.frame, xzoom=1, yzoom=1),
+        "window_background" : Transform(bubble.frame, alpha=0.55),
         "window_bottom_padding" : 27,
     },
 
     "bottom_right" : {
-        "window_background" : Transform(bubble.frame, xzoom=-1, yzoom=1),
+        "window_background" : Transform(bubble.frame, alpha=0.55),
         "window_bottom_padding" : 27,
     },
 
     "top_left" : {
-        "window_background" : Transform(bubble.frame, xzoom=1, yzoom=-1),
+        "window_background" : Transform(bubble.frame, alpha=0.55),
         "window_top_padding" : 27,
     },
 
     "top_right" : {
-        "window_background" : Transform(bubble.frame, xzoom=-1, yzoom=-1),
+        "window_background" : Transform(bubble.frame, alpha=0.55),
         "window_top_padding" : 27,
     },
 
     "thought" : {
-        "window_background" : bubble.thoughtframe,
+        "window_background" : Transform(bubble.thoughtframe, alpha=0.0),
     }
 }
 

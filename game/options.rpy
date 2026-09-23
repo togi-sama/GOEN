@@ -75,7 +75,7 @@ define config.has_voice = True
 ## the player is at the main menu. This file will continue playing into the
 ## game, until it is stopped or another file is played.
 
-define config.main_menu_music = concrete
+#define config.main_menu_music = concrete
 
 
 ## Transitions #################################################################
@@ -238,3 +238,11 @@ init python:
 ## by a slash.
 
 # define build.itch_project = "renpytom/test-project"
+
+init python:
+    config.keymap["skip"] = [
+        key for key in config.keymap["skip"]
+        if key not in ("anymod_K_LCTRL", "anymod_K_RCTRL")
+    ]
+
+    renpy.clear_keymap_cache()

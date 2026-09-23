@@ -19,7 +19,7 @@ init python:
 
 #for narration shake effects
 style kinetic_narrator:
-    font "gui/font/Hashiba.ttf"
+    font "gui/font/baskervville.regular.ttf"
     size 28
     color "#ffffff"
 
@@ -70,7 +70,7 @@ default persistent.typeface = "DejaVuSans"
 ## The font used for character names.
 define gui.name_text_font = "DejaVuSans.ttf"
 
-## The font used for out-of-game text.
+## The font used for out-of-game text.define gui.text_size = 30
 define gui.interface_text_font = "DejaVuSans.ttf"
 
 ## The font used for hyperlink text. Should be the same as gui.interface_text_font.
@@ -78,7 +78,7 @@ define gui.interface_text_font = "DejaVuSans.ttf"
 define gui.hyperlink_text_font = gui.interface_text_font
 
 ## The size of normal dialogue text.
-define gui.text_size = gui.preference("size", 21)
+define gui.text_size = gui.preference("size", 20)
 
 ## The size and color of normal dialogue text outlines.
 ## Uncomment this if you would like that style.
@@ -151,7 +151,7 @@ define gui.namebox_tile = False
 ## number of pixels relative to the left or top side of the textbox, or 0.5 to
 ## center.
 define gui.dialogue_xpos = 320
-define gui.dialogue_ypos = 27
+define gui.dialogue_ypos = 45
 
 ## The maximum width of dialogue text, in pixels.
 define gui.dialogue_width = 690
