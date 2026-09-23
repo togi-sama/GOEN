@@ -36,6 +36,39 @@ image nestor serious = "images/sprites/nestor_serious.png"
 image nestor smiling = "images/sprites/nestor_smiling.png"
 image location_map = "images/BG/shop.png"
 
+init python:
+    def make_speaker_focus(active_tag):
+        def callback(event, interact=True, **kwargs):
+            if event != "begin":
+                return
+
+            positions = {
+                "yun": renpy.store.right,
+                "nestor": renpy.store.left,
+                "dan": renpy.store.right,
+            }
+
+            for tag, position in positions.items():
+                attributes = renpy.get_attributes(tag)
+
+                if not attributes:
+                    continue
+
+                image_name = tag + " " + " ".join(attributes)
+                focus_transform = (
+                    renpy.store.talking
+                    if tag == active_tag
+                    else renpy.store.not_talking
+                )
+
+                renpy.show(
+                    image_name,
+                    tag=tag,
+                    at_list=[position, focus_transform],
+                )
+
+        return callback
+
 # Declare characters used by this game. The color argument colorizes the
 # name of the character.
 
@@ -44,13 +77,28 @@ define narrator = Character(
     what_color="#ffffff",
     what_font="gui/font/baskervville.regular.ttf"
 )
-define yun = Character("Yun", color="#faf9f9", image="yun")
+define yun = Character(
+    "Yun",
+    color="#faf9f9",
+    image="yun",
+    callback=make_speaker_focus("yun")
+)
 define woman = Character("???", color="#d69ae2")
-define dan = Character("Dan", color="#a2d6f9", image="dan")
+define dan = Character(
+    "Dan",
+    color="#a2d6f9",
+    image="dan",
+    callback=make_speaker_focus("dan")
+)
 define yun_bubble = Character("Yun", image="yun", kind = bubble)
 define dan_bubble = Character("Dan", image="dan", kind = bubble)
 define nestor_bubble = Character("Nestor", image="nestor", kind = bubble)
-define nestor = Character("Nestor", color="#f9d6a2", image="nestor")
+define nestor = Character(
+    "Nestor",
+    color="#f9d6a2",
+    image="nestor",
+    callback=make_speaker_focus("nestor")
+)
 
 ## Splashscreen ############################################################
 ## A portion of the game that plays at launch, before the main menu is shown.
@@ -247,10 +295,10 @@ label start:
 
     narrator "It is the sheep hour. He wondered when he had fallen asleep."
 
-    show yun neutral at right, talking
+    show yun neutral at right
     with dissolve
 
-    yun_bubble '"Perhaps I brewed the tea leaves a little too well."'
+    yun '"Perhaps I brewed the tea leaves a little too well."'
 
     narrator "The cup is still by his elbow, colder now- a thin film has formed on the surface."
     narrator "Shelves of dried herb rise on either side of him, dust caught in the gold light swirling in the shop front. It’s quiet."
@@ -262,44 +310,44 @@ label start:
     narrator "Yun moves on. He cannot afford to wait for them."
     narrator "A bell chimes from inside the shop, a sound he associates with change. From the shared hallway, the clack of his master’s heeled shoes approach lightly."
     
-    show yun neutral at right, talking
+    show yun neutral at right
 
-    yun_bubble '"I wasn’t out too long, was I?"'
+    yun '"I wasn’t out too long, was I?"'
 
-    show yun neutral at right, not_talking
-    show nestor neutral at left, talking
+    show yun neutral at right
+    show nestor neutral at left
     with dissolve
 
-    nestor_bubble '"Hmm. Long enough that I served two customers while you slept through both, dear Apprentice."'
+    nestor '"Hmm. Long enough that I served two customers while you slept through both, dear Apprentice."'
 
-    show nestor neutral at left, not_talking
-    show yun neutral at right, talking
+    show nestor neutral at left
+    show yun neutral at right
 
-    yun_bubble '"I’m sorry. I don’t even remember sitting down."'
+    yun '"I’m sorry. I don’t even remember sitting down."'
     narrator "He apologizes with the humility of someone who’s had a lot of practice getting blamed. A habit he doesn’t need around his kind master."
     
-    show yun neutral at right, not_talking
-    show nestor neutral at left, talking
+    show yun neutral at right
+    show nestor neutral at left
     
-    nestor_bubble '"You didn’t as I recall. You were sorting jars, and then you weren’t."'
+    nestor '"You didn’t as I recall. You were sorting jars, and then you weren’t."'
 
-    show nestor smiling at left, talking
+    show nestor smiling at left
     #smiling
-    nestor_bubble '"Let’s try a draught that you drink outside your shift instead."'
+    nestor '"Let’s try a draught that you drink outside your shift instead."'
     narrator "Yun looks down at his hands, half expecting them to be holding something still. They aren’t."
-    nestor_bubble '"You look like you were dreaming awake rather than sleeping."'
+    nestor '"You look like you were dreaming awake rather than sleeping."'
 
-    show nestor neutral at left, not_talking
-    show yun neutral at right, talking
+    show nestor neutral at left
+    show yun neutral at right
 
-    yun_bubble '"Is there a difference anymore? With me?"'
+    yun '"Is there a difference anymore? With me?"'
 
-    show yun neutral at right, not_talking
-    show nestor neutral at left, talking
+    show yun neutral at right
+    show nestor neutral at left
 
-    nestor_bubble '"There used to be. Lately, you seem to believe less that there is."'
+    nestor '"There used to be. Lately, you seem to believe less that there is."'
     narrator "Yun doesn’t answer directly. He pushes off the counter and keeps his hands busy, back to sorting jars into the shelves. The small repetitive motions standing in for what he can’t say."
-    nestor_bubble '"Another dream? Do they still chase?"'
+    nestor '"Another dream? Do they still chase?"'
 
     menu:
         '"They do."':
@@ -460,7 +508,101 @@ label PI:
         yun '"You did, last spring. Before the case went cold."'
         narrator "Dan’s pen stops."
     
+    # Place Bleed Scene (check if keep or nah)
+    dan '"Did you say something?"'
+    yun '"I- Yes I did. Just now."'
+    yun '"You asked who pulled the original reports."'
+    dan '"I didn’t, I thought it. Don’t recall saying it out loud."'
+    narrator "The silence is uncomfortable."
+    yun '"...I need to sit down."'
+    dan '"Yun."'
+    yun '"I’m fine, it’s just- I heard you say something you didn’t say."'
+    narrator "He sits. The room stays exactly as it is- smoke curling out the window, the ledger, and the files scattered on the desk."
+    dan '"Say that again. Slowly this time."'
+    yun '"You asked who pulled the original reports. I answered you. Then you told me you never asked it out loud."'
+    dan '"Because I didn\'t"'
+    yun '"I know. That's the part I'm having trouble with…"'
+    dan '"Kid, when’s the last time you slept? Actually slept. Not whatever it is you do on Nestor’s counter."'
+    yun '"That’s not what this is."'
+    narrator "Yun’s reply comes off more defensive than he’d like."
+    dan'"I didn’t say it was. Answer me."'
+    yun '"I..."'
+    yun '"I don’t know. A while."'
+    narrator "Dan exhales through his nose, it’s not quite a sigh."
+    yun '"Don’t you burn the midnight oil too, Captain?"'
+    narrator "Yun doesn’t miss the twitch in Dan’s eye at the title. It was a slip of the tongue."
+    dan '"I’ll pretend I didn’t hear that."'
+    dan '"You’ve been running on fumes and- and dream-logic for I don’t know how long."'
+    dan '"And you expect me to believe you heard my thoughts and it’s not just your ears getting ahead of your sense?"'
+    yun '"I know how it sounds."'
+    dan '"Do you? Because it sounds to me like you’re exhausted, Yun. It sounds like too many nights arguing with something that isn’t in the room."'
+    dan '"And now you’re expecting that everywhere, even outside of those nights."'
+    narrator "Yun doesn’t answer right away. He thinks some of what Dan is saying might be fair."
+    yun '"Maybe. I’ve thought that too. More than once, Dan."'
+    dan '"But?"'
+    yun '"But every time I go looking for answers there’s always something after it. Something that thinking-through can’t explain. That my exhaustion can’t be the answer."'
+    narrator "Dan observes Yun carefully, and for a long moment, he gives him the same look he gave the ledger. One deciding whether this strangeness deserves investigation or dismissal."
+    dan '"Alright, kid. Say I believe you heard something. Whether the building’s whispers or mine. What did I say exactly?"'
+    yun '"You asked who pulled the original reports. And I told you, you did. Last spring, before the case went cold."'
+    dan '"That’s true. For what it’s worth."'
+    yun '"I know. I don’t know how I knew that though."'
+    narrator "Dan sets his jaw, the closest he comes to looking genuinely unsettled rather than skeptical. He finds he’s been doing that more in this building."
+    dan '"So either you’re pulling facts about my casework from somewhere you shouldn’t have access to, or-"'
+    yun '"Or I’m just tired like you said."'
+    dan '"I was going to say that I might have forgotten I even said anything. Which would be rather silly of me. A far more mundane reason that I\'d prefer."'
+    #smiling
+    yun '"I’d prefer that too."'
+    narrator "Neither of them say anything for a while. The incense burns out and the scent of tobacco is winning again, like it always does."
+    dan '"Drink some water, kid. I’m not sending you back down shaking like that. Nestor would have my head."'
+    dan '"And rightly."'
+    yun '"I’m alright"'
+    dan '"You said that earlier, I’m not taking my chances. I didn’t believe you the first time either."'
+    narrator "Yun manages something like a smile, though it doesn’t hold for long. His eyes drift towards the ledger without really meaning to."
+    narrator "It’s disturbing, now that Yun’s sat down and thought about it."
+    narrator "Nothing marked the moment as false as it happened. The only proof of it not being real was Dan saying so."
+    narrator "And Dan could always, in principle, be lying too."
+    narrator "No. He shouldn’t think that."
+    narrator "Right. The woman holding a child’s bracelet."
+    narrator "He dreamed of her too."
 
+    menu:
+        "Bring it up to Dan.":
+            yun '"Could I ask you something? It’s unrelated…'
+            dan '"You\'re already asking."'
+            yun '"Has anyone reported a child’s bracelet missing recently? Jade. Cheap, intricate."'
+            narrator "Dan’s face doesn’t change quickly enough to hide what it wanted to."
+            dan '"Why do you ask?"'
+            yun '"I don’t know. It’s just been on my mind."'
+            dan '"That’s not an answer, Yun."'
+            yun '"It’s the only one I have."'
+            narrator "Dan doesn’t say anything for a moment too long, certainly longer than the question deserves."
+            narrator "A bell chimes from somewhere in the building."
+            dan '"Damn quack really doesn’t like to share employees."'
+            yun '"Nestor did mention he needed me downstairs as soon as I could. Downstairs downstairs."'
+            dan '"Is it urgent?"'
+            yun '"He didn’t say. But I rarely get to help in the mortuary. I can’t keep him waiting."'
+            dan '"Figures. The living are a second thought in this building."'
+            #smiling
+            yun '"Don’t be like that, Captain. I’ll be quick."'
+            dan '"I’ll look into it. Go on, Nestor’s waiting on you."'
+            dan '"Unless you’d rather sit here with me worrying about jewelry, which I prefer you not. Your master will have a great say in my always hogging your time."'
+            yun '"I’ll take the excuse to leave actually."'
+            dan '"Smart man."'
+        
+        "Ask about going downstairs.":
+            narrator "A bell chimes from somewhere in the building."
+            yun '"Nestor needs me downstairs. I should go."'
+            dan '"Running from me or the conversation?"'
+            yun '"Can’t it be both?"'
+            dan '"Fair enough. Go on, then."'
+            narrator "Yun leaves the thought unsaid. Whatever the thought was stays exactly as it is."
+            yun '"Thank you, Dan."'
+            dan '"Light some incense before coming back. Don’t go bringing his business into mine."'
+        
+    jump shop_loop
+
+    
+    
 
 
 

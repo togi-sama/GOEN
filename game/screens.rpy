@@ -105,7 +105,7 @@ screen say(who, what):
 
     window:
 
-        background Transform("gui/textbox_gradient.png", xysize = (1280, 185), alpha = 1.0)
+        background Transform("gui/text box.png", xysize = (1280, 185), alpha = .5)
 
         ### IMPORTANT: The Transform() is holding the window background, and the alpha variable ties to our say window alpha
 
@@ -1504,22 +1504,22 @@ define bubble.thoughtframe = Frame("gui/thoughtbubble.png", 55, 55, 55, 55)
 
 define bubble.properties = {
     "bottom_left" : {
-        "window_background" : Transform(bubble.frame, alpha=0.55),
+        "window_background" : Transform(bubble.frame, alpha=0),
         "window_bottom_padding" : 27,
     },
 
     "bottom_right" : {
-        "window_background" : Transform(bubble.frame, alpha=0.55),
+        "window_background" : Transform(bubble.frame, alpha=0),
         "window_bottom_padding" : 27,
     },
 
     "top_left" : {
-        "window_background" : Transform(bubble.frame, alpha=0.55),
+        "window_background" : Transform(bubble.frame, alpha=0),
         "window_top_padding" : 27,
     },
 
     "top_right" : {
-        "window_background" : Transform(bubble.frame, alpha=0.55),
+        "window_background" : Transform(bubble.frame, alpha=0),
         "window_top_padding" : 27,
     },
 
