@@ -164,15 +164,22 @@ label splashscreen:
 
     return
 
+default pi_scene_complete = False
+
 label shop_loop:
 
     call screen shop
 
+    if _return == "PI":
+        jump PI
+
+    if _return == "mortuary":
+        jump mortuary
+
     if _return == "wrong":
         jump wrong_location
 
-    if _return == "PI":
-        jump PI
+    jump shop_loop
 
 screen shop():
 
@@ -186,7 +193,10 @@ screen shop():
         ypos 80
         xsize 340
         ysize 510
-        action Jump("PI")
+        if not pi_scene_complete:
+            action Return("PI")
+        else:
+            action Return("wrong")
 
     # Middle door
     imagebutton:
@@ -206,7 +216,10 @@ screen shop():
         ypos 45
         xsize 265
         ysize 560
-        action Return("wrong")
+        if pi_scene_complete:
+            action Return("mortuary")
+        else:
+            action Return("wrong")
 
 label wrong_location:
 
@@ -521,7 +534,7 @@ label PI:
     dan '"Say that again. Slowly this time."'
     yun '"You asked who pulled the original reports. I answered you. Then you told me you never asked it out loud."'
     dan '"Because I didn\'t"'
-    yun '"I know. That's the part I'm having trouble with…"'
+    yun '"I know. That\'s the part I\'m having trouble with…"'
     dan '"Kid, when’s the last time you slept? Actually slept. Not whatever it is you do on Nestor’s counter."'
     yun '"That’s not what this is."'
     narrator "Yun’s reply comes off more defensive than he’d like."
@@ -599,7 +612,30 @@ label PI:
             yun '"Thank you, Dan."'
             dan '"Light some incense before coming back. Don’t go bringing his business into mine."'
         
+    $ pi_scene_complete = True
     jump shop_loop
+
+######################################################
+# Scene 4
+######################################################
+
+label mortuary:
+    narrator "These stairs don’t end where he remembers. He counts them anyway, an old habit out of an old order."
+    narrator "Beneath him the temperature changes before the stairwell does. Cold air comes up to greet him. It always does on the way to the mortuary."
+    narrator "But today it arrived soon"
+    narrator "Yun stares into the void. The stairs seem longer by the second."
+    narrator "A bracelet catches light before he sees who’s holding it."
+    woman '"You’re going the wrong way."'
+    yun '"I’m going the way I always go."'
+    woman '"Not today."'
+    narrator "His hands reach out for the railing, and it isn’t there. Not gone, just farther away than his hand expected."
+    woman '"Don’t wake up."'
+    yun '"I’m not asleep."'
+    woman '"Then why are you counting?"'
+    narrator "He looks down at his feet and can’t remember what step he’s on. The dark beneath him doesn’t answer either."
+    
+    # Put CG
+    yun '"Vertigo."'
 
     
     

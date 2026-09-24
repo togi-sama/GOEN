@@ -60,13 +60,14 @@ init python:
             renpy.restart_interaction()
 
     def spawn_label(label):
-        # Picking a name from the list spawns a draggable copy of it.
-        # The original entry stays in the list.
-        global herb_active_label
+        # Picking an available name closes the list and spawns a draggable copy.
+        global herb_active_label, herb_labels_open, herb_label_spawn_serial
         if label_is_assigned(label):
             renpy.notify("That label is already on a jar.")
             return
         herb_active_label = label
+        herb_label_spawn_serial += 1
+        herb_labels_open = False
         renpy.restart_interaction()
 
     def label_dragged(drags, drop):
@@ -140,12 +141,14 @@ init python:
             renpy.restart_interaction()
 
     def reset_herb_minigame():
-        global herb_jars, herb_prescription_open, herb_labels_open, herb_selected_jar, herb_active_label, herb_mislabeled_clue_found
+        global herb_jars, herb_prescription_open, herb_labels_open, herb_selected_jar, herb_active_label, herb_label_spawn_serial, herb_mislabeled_clue_found
         herb_jars = make_herb_jars()
         herb_prescription_open = False
         herb_labels_open = False
         herb_selected_jar = None
         herb_active_label = None
+        # Keep the serial moving forward so a reset cannot reuse a drag position.
+        herb_label_spawn_serial += 1
         herb_mislabeled_clue_found = False
         renpy.hide_screen("jar_options")
         renpy.restart_interaction()
@@ -156,6 +159,7 @@ default herb_prescription_open = False
 default herb_labels_open = False
 default herb_selected_jar = None
 default herb_active_label = None
+default herb_label_spawn_serial = 0
 default herb_mislabeled_clue_found = False
 
 
@@ -232,7 +236,6 @@ screen herb_minigame():
                 align (0.5, 0.5)
                 size 18
 
-    # The label list: names stay in place; clicking one spawns a draggable copy.
     textbutton "Labels":
         action ToggleVariable("herb_labels_open")
         xpos 1120
@@ -302,11 +305,10 @@ screen herb_minigame():
                         align (0.5, 0.5)
                         size 18
 
-        # The spawned label copy. It appears next to the list when a name is
-        # picked, and vanishes once it has been dropped.
+        
         if herb_active_label:
             drag:
-                drag_name "active_label"
+                drag_name "active_label_" + str(herb_label_spawn_serial)
                 draggable True
                 droppable False
                 dragged label_dragged
