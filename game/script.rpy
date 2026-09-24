@@ -13,27 +13,26 @@ transform heavy_vignette:
     alpha 0.85
 
 transform talking:
-    ease 0.15 zoom 1.0
+    ease 0.15 zoom .9
     matrixcolor BrightnessMatrix(0.0)
 
 transform not_talking:
-    ease 0.15 zoom 0.95
     matrixcolor BrightnessMatrix(-0.3)
 
 
 
 # images.
-image yun neutral = "images/sprites/yun_neutral.png"
-image yun smiling = "images/sprites/yun_smiling.png"
-image yun soft = "images/sprites/yun_soft.png"
-image yun closed = "images/sprites/yun_closed.png"
-image yun disturbed = "images/sprites/yun_disturbed.png"
-image dan neutral = "images/sprites/dan_neutral.png"
-image dan serious = "images/sprites/dan_serious.png"
-image dan smiling = "images/sprites/dan_smiling.png"
-image nestor neutral = "images/sprites/nestor_neutral.png"
-image nestor serious = "images/sprites/nestor_serious.png"
-image nestor smiling = "images/sprites/nestor_smiling.png"
+image yun neutral = Transform("images/sprites/yun_neutral.png", zoom = 0.85)
+image yun smiling = Transform("images/sprites/yun_smiling.png", zoom = 0.85)
+image yun soft = Transform("images/sprites/yun_soft.png", zoom = 0.85)
+image yun closed = Transform("images/sprites/yun_closed.png", zoom = 0.85)
+image yun disturbed = Transform("images/sprites/yun_disturbed.png", zoom = 0.85)
+image dan neutral = Transform("images/sprites/dan_neutral.png", zoom = 0.85)
+image dan serious = Transform("images/sprites/dan_serious.png", zoom = 0.85)
+image dan smiling = Transform("images/sprites/dan_smiling.png", zoom = 0.85)
+image nestor neutral = Transform("images/sprites/nestor_neutral.png", zoom = 0.85)
+image nestor serious = Transform("images/sprites/nestor_serious.png", zoom = 0.85)
+image nestor smiling = Transform("images/sprites/nestor_smiling.png", zoom = 0.85)
 image location_map = "images/BG/shop.png"
 
 init python:
@@ -45,7 +44,7 @@ init python:
             positions = {
                 "yun": renpy.store.right,
                 "nestor": renpy.store.left,
-                "dan": renpy.store.right,
+                "dan": renpy.store.left,
             }
 
             for tag, position in positions.items():
@@ -450,12 +449,24 @@ label PI:
     dan '"If that’s you, Yun, the door’s open. Unless you’re here to peddle, then it’s locked."'
     yun '"There’s been a mix-up. You left your reports in the pharmacy."'
     narrator "Yun turns the knob and eases the door open; it creaks with a groan."
+
+    show office
+    with fade
+
     narrator "The office greets him with the faint bite of tobacco and the warmth of sandalwood. The scent clings to the lacquered furniture and the dust on the blinds."
     narrator "The window is cracked open, smoke curling out like a ghost."
     narrator "Yun doesn’t mind. The whole building breathes in herbs and ash."
     narrator "Dan sits behind his desk, sleeves rolled up, collar undone, as if he’s been arguing with the paperwork itself."
     narrator "His spine is straight from a habit no civilian job ever gave him. Even worn, his shoulders tell you who he once was."
+
+    show dan neutral at left
+    with dissolve
+
     dan '"Another misplaced report? Tell Nestor to keep his pharmacy from eating my papers."'
+
+    show yun neutral at right
+    with dissolve
+
     yun '"He thinks yours wandered over first."'
     narrator "Yun places the documents on the desk, careful not to disturb the others."
     yun '"I thought I left these here last night."'

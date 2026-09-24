@@ -98,6 +98,24 @@ style frame:
 
 ## We need to redefine the `centered` speaker so the textbox doesn't appear due
 ## to the custom opacity slider.
+
+screen cinematic_bars():
+
+    $ bar_height = 40
+
+    add Solid("#000000"):
+        xsize config.screen_width
+        ysize bar_height
+        xpos 0
+        ypos 0
+
+    add Solid("#000000"):
+        xsize config.screen_width
+        ysize bar_height
+        xpos 0
+        yalign 1.0
+
+
 define centered = Character(None, window_background=None)
 
 screen say(who, what):

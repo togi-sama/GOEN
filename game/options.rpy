@@ -125,6 +125,7 @@ define config.say_attribute_transition = dissolve
 ## "window hide", and "window auto" statements.
 
 define config.window = "auto"
+define config.gl_clear_color = "#000000"
 
 
 ## Transitions used to show and hide the dialogue window
@@ -239,6 +240,7 @@ init python:
 
 # define build.itch_project = "renpytom/test-project"
 
+#disable ctrl skipping
 init python:
     config.keymap["skip"] = [
         key for key in config.keymap["skip"]
@@ -246,3 +248,6 @@ init python:
     ]
 
     renpy.clear_keymap_cache()
+
+init python:
+    config.overlay_screens.append("cinematic_bars")
