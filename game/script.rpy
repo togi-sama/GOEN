@@ -13,7 +13,6 @@ transform heavy_vignette:
     alpha 0.85
 
 transform talking:
-    ease 0.15 zoom .9
     matrixcolor BrightnessMatrix(0.0)
 
 transform not_talking:
@@ -99,12 +98,7 @@ define nestor = Character(
     callback=make_speaker_focus("nestor")
 )
 
-## Splashscreen ############################################################
-## A portion of the game that plays at launch, before the main menu is shown.
-## https://www.renpy.org/doc/html/splashscreen_presplash.html
-
-## The animation is boring so I recommend using something else.
-## ATL documentation: https://www.renpy.org/doc/html/atl.html
+## Splashscreen
 
 image splash_anim_1:
 
@@ -162,6 +156,7 @@ label splashscreen:
         $ persistent.firstlaunch = True
 
     return
+
 
 default pi_scene_complete = False
 
@@ -622,7 +617,6 @@ label PI:
             narrator "Yun leaves the thought unsaid. Whatever the thought was stays exactly as it is."
             yun '"Thank you, Dan."'
             dan '"Light some incense before coming back. Don’t go bringing his business into mine."'
-        
     $ pi_scene_complete = True
     jump shop_loop
 
@@ -647,14 +641,67 @@ label mortuary:
     
     # Put CG
     yun '"Vertigo."'
+    yun '"It is not the fear of falling, but the desire to. The pull…downward, to the depths."'
+    yun '"A sweet resounding summons to renounce my waking self. In moments of weakness, I found I was ready to heed the call– to descend to a place where no one ever wakes."'
+    narrator "There is no mortuary at the bottom. Only more stairs."
+    narrator "Then his shoulder hits a doorframe. Nestor’s voice is already mid-sentence, as if no time passed at all."
 
-    
-    
-
-
-
-
-
+    nestor '"-there you are. I’ll need your hands today."'
+    narrator "Yun nods."
+    yun '"Of course."'
+    narrator "Nestor gestures toward the table, to the covered form beneath the sheet."
+    nestor '"Nothing complicated. Just help me bring him up, keep things steady. If you feel yourself drifting, say so. We can slow down."'
+    narrator "Yun draws a quiet breath."
+    yun '"Alright."'
+    narrator "Nestor turns back to the table, already reaching for the cloth. Yun stands behind Nestor, blocking the draft from the staircase."
+    narrator "His posture is stiff, arms locked at parade rest. An old habit his body always reaches for."
+    narrator "Nestor opens a tin of balm, the metal sliding softly in his hands."
+    nestor '"Follow my movement. We go together."'
+    narrator "Yun doesn’t notice he’s holding his breath."
+    nestor '"At ease."'
+    yun '"Right..."'
+    nestor '"The wind moves freely. You can too, Yun. Don’t hold yourself hostage to stillness."'
+    narrator "The body waits. So do they."
+    narrator "Yun steps closer, the floor cold under his shoes. Fingers hover over the sheet, hesitant. And the strange urge to apologize is swallowed before it becomes a word."
+    narrator "The weight…of a person in death. The same weight he carries from his dreams."
+    narrator "He sees himself in the cadaver. He shouldn’t."
+    narrator "Still, he wonders if he too is weightless-yet burdened- when he is not awake."
+    yun '"Should I lift it…like this?"'
+    nestor '"Carry the weight with your arms, Yun. Not your mind. Feel it, don’t think it."'
+    yun '"Like this."'
+    nestor '"Better."'
+    narrator "Nestor works beneath and around what Yun holds steady, completely trusting Yun to lift."
+    nestor '"You are stronger than you look, dear Apprentice."'
+    yun '"It’s heavier than I expected. Nothing I can’t carry. Just…strange."'
+    nestor '"Burdens do not weigh the body post mortem. Still, it is not light–the weight of death."'
+    narrator "Yun’s eyes briefly catch the tin beside them. For a moment it isn’t his reflection he half-sees there."
+    narrator "A man in uniform. A version of himself he has tried to no longer answer to."
+    narrator "He blinks, and it’s Yun again."
+    yun '"He looks…young."'
+    nestor '"He is."'
+    yun '"That doesn’t feel right."'
+    nestor '"No. But such is the way of things. It was his life to finish."'
+    yun '"Sometimes I think… if I’d done more. If I were faster. Better. Maybe some of them wouldn’t be down here."'
+    nestor '"You are very fond of bargaining with time."'
+    yun '"I don’t like wasting it."'
+    yun '"My existence, I can justify it… Not for any reason like my right to live. But because I’m needed. I have to be."'
+    nestor '"You say that like it isn’t enough that you are here."'
+    yun '"Is it?"'
+    nestor '"An old argument. You’ve had it with yourself longer than with me."'
+    narrator "Nestor wipes his hands on a cloth, allowing Yun to think in the pause."
+    nestor '"I suggest you learn from your mistakes. Suffer less for them. Doctor’s advice."'
+    #smiling
+    yun '"You’re not a doctor."'
+    #smiling
+    nestor '"My clients would say I am. In a way."'
+    narrator "The last of it is quiet work. Yun wipes the table in exact, measured strokes. Straight lines. No overlap. No waste."
+    narrator "Too careful."
+    narrator "His hand slows, then stops altogether."
+    narrator "He notices it- how rigid his wrist has become, how his breath has gone shallow."
+    narrator "He deliberately smears the cloth in a wider arc. Messier. Human. The surface is still clean. His shoulders loosen."
+    nestor '"You did well."'
+    yun '"What?"'
+    nestor '"I've seen you do that correction over the years. Tight, then loose, and now honest."'
 
 
     return
