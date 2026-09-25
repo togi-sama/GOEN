@@ -73,7 +73,8 @@ init python:
 define narrator = Character(
     None,
     what_color="#ffffff",
-    what_font="gui/font/baskervville.regular.ttf"
+    what_font="gui/font/baskervville.regular.ttf",
+    callback = make_speaker_focus(None)
 )
 define yun = Character(
     "Yun",
@@ -701,7 +702,80 @@ label mortuary:
     narrator "He deliberately smears the cloth in a wider arc. Messier. Human. The surface is still clean. His shoulders loosen."
     nestor '"You did well."'
     yun '"What?"'
-    nestor '"I've seen you do that correction over the years. Tight, then loose, and now honest."'
+    nestor '"I\'ve seen you do that correction over the years. Tight, then loose, and now honest."'
+    yun '"Is that a compliment?"'
+    nestor '"It’s an observation. Take it how you will, you of all people know what my compliments are like."'
+    narrator "Yun almost laughs. The lightness and humor of it shifts something inside his chest and eases the tension he doesn’t realize was there."
+    nestor '"Keep your hands busy a little longer. Slower, if you need to. Even the wind doesn’t rush, and yet it gets everywhere it needs to."'
+    yun '"You make it sound so easy. I… can’t be anything like wind."'
+    nestor '"I make it sound possible, dear apprentice. Trust in yourself a little more."'
+    narrator "Yun does as Nestor says. He works, he keeps his hands busy."
+    woman '"Don’t wake up."'
+    nestor '"What a lovely tune."'
+    yun '"Hm?"'
+    nestor '"You’re humming. I don’t recognize the melody."'   
+    #smiling
+    yun '"I don’t either."'
+    narrator "There’s a slight tremble to his fingers as he grabs the herbs and incense. He hands them to Nestor, proud to have remembered without being told."
+    narrator "Nestor stays quiet, doesn’t reply, his fingers busy wiping a bowl. He doesn’t look away either. He leaves the door-the conversation- open without forcing anyone to walk through."
 
+    menu:
+        "Tell Nestor about the dream":
+            yun '"I dreamt of something…"'
+            narrator "Nestor doesn’t look up, not right away, but his hands still. Yun learned to read that as the master giving his full attention."
+            nestor '"Go on."'
+            yun '"A woman. I don’t see her clearly, just what she’s holding. A child’s bracelet."'
+            nestor '"Does she speak to you?"'
+            yun '"No… I don’t know. The others do, sometimes I can’t tell."'
+            narrator "Nestor sets the bowl down now, turning to face Yun properly."
+            nestor '"Then she’s not one of them. Not the same haunting, at least. Not now…maybe not ever."'
+            yun '"How do you know for sure?"'
+            nestor '"I don’t, not for certain. But if the dream is still voiceless then maybe it’s a different kind of visitor than the ones that have your name memorized."'
+            yun '"But if she did say something?"'
+            nestor '"Give it time before you decide what it wants with you."'    
+            yun '"Upstairs, Dan thinks I was just tired."'
+            nestor '"Dan thinks everyone is tired. I don’t begrudge him for it. It\'s comfortable to believe."'
+            nestor '"Especially for a man like the detective who’s spent his whole career needing explanations for everything. Ghosts don’t make reports after all."'
+            #smiling
+            yun '"I think he’s afraid of ghosts."'
+            #smiling
+            nestor '"Unlucky for him then to share the same building with us who aren’t."'
+            yun '"You don’t think I’m tired?"'
+            nestor '"I think you’re both tired and something else. And only one of those sleep can fix."'
+            nestor '"That’s not very reassuring."'
+            nestor '"It wasn’t meant to be. It was meant to be true. I find both rarely meet in my line of work."'
+            nestor '"Regardless, I do think you’re pushing yourself. I prescribed you a brew, didn’t I?"'
+            yun '"It works a little too well, I think."'
+            nestor '"When it speaks- if it speaks, don’t answer right away. Wait, and wait as long as you have to, to know it is you answering."'
+            nestor '"The fear will always answer faster, and it is rarely ever right."'
+            yun '"And if I can’t tell the difference?"'
+            nestor '"Then you ask. That’s what I’m here for, on the days that I still am."'
+            nestor '"Or Dan. For what it’s worth that man cares more than he lets on."'
 
+        "Say Nothing.":
+            narrator "Yun returns to cleaning the remaining tools on the table, the clink of porcelain and metal doing the talking he isn’t ready to."
+            narrator "Nestor doesn’t push, he never does. He only keeps the door open for when Yun is ready, now or for the next."
+            nestor '"You tell me when it’s ready to be told. Or don’t. Then I’ll just guess like always."'
+            yun '"You’re a very patient man."'
+            #smiling
+            yun '"Must be because you’re always with people who can’t complain."'
+            #smiling
+            nestor '"One of the few advantages of my job."'
+            narrator "Nestor returns to the pharmacy first, a bell chimes from somewhere."
+            narrator "Yun is alone now, drifting between dream and waking. The barrier is weaker here than it’s been all day."
+            narrator "He can’t help but whisper to himself. Reassurance mostly."
+            yun '"Still. Everything is still when the work is done.I’ll leave it here… at least for now.'
+            yun '"I carry the weight, but not the burden."'
+            narrator "The stairs are shorter than they were coming back down. He doesn’t stop to think why."
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     return
