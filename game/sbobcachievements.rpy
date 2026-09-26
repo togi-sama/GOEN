@@ -48,7 +48,11 @@ define BOBCACHIEVEMENTS_UNGRANTED_COLOR = gui.insensitive_color
 # - BOBCACHIEVEMENTS_MAP : map of {reference_id:str : (title:str, description:str, is_hidden:boolean)}
 screen bobcachievements():
     tag menu
-    default numachievements = len(persistent._achievements)
+    ## Counted with achievement.has(), the same call the loop below uses.
+    ## This previously read persistent._achievements, which the Ren'Py
+    ## achievement module never creates -- it raised AttributeError and took
+    ## the whole screen down.
+    default numachievements = len([a for a in BOBCACHIEVEMENT_LIST if achievement.has(a[0])])
     use extras_menu(_("Achievements"), scroll="viewport"):
         style_prefix "about"
         vbox:

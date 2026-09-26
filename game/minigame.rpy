@@ -168,7 +168,7 @@ screen herb_minigame():
     modal True
 
     $ jar_positions = [(410, 205), (570, 205), (730, 205), (490, 390), (650, 390)]
-    add "room"
+    add "black"
 
     textbutton "Prescription":
         action ToggleVariable("herb_prescription_open")
@@ -208,7 +208,7 @@ screen herb_minigame():
 
                             if prescription_index == len(herb_orders) - 1:
                                 textbutton "{s}[prescription['crossed_out_name']]{/s}":
-                                    action [SetVariable("herb_mislabeled_clue_found", True), Notify("There’s a name crossed out messily in ink. Not a habit either of them have.")]
+                                    action [SetVariable("herb_mislabeled_clue_found", True), Function(bobcachievement_grant, "mislabeled"), Notify("Clue Found: Mislabeled Name")]
                                     text_size 15
                                     text_color "#d8a66d"
                                     text_hover_color "#fff0ae"

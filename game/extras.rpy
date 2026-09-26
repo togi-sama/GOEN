@@ -261,6 +261,8 @@ screen extras_navigation():
 
         textbutton _("Replay Room") action ShowMenu("replay_gallery") alt "Replay Room"
 
+        textbutton _("Endings") action ShowMenu("ending_gallery") alt "Endings"
+
         if persistent.game_clear:
 
             textbutton _("Developer Notes") action ShowMenu("dev_notes") alt "Developer Notes"
@@ -437,12 +439,67 @@ screen replay_gallery():
             xalign 0.5
             yalign 0.5
 
-            # The buttons that play each section.
+            # The buttons that play each section. These must match real
+            # labels: the pharmacy is inline in `start`, not its own label.
             textbutton "The Beginning" action Replay("start")
-            textbutton "The Office" action Replay("office")
-            textbutton "The Beach" action Replay("beach")
+            textbutton "The Office" action Replay("PI")
+            textbutton "The Mortuary" action Replay("mortuary")
 
             null height 20
+
+## Endings Gallery screen #####################################
+##
+## Lists the three routes. A title and blurb stay hidden until the player has
+## actually reached that ending; the persistent.endings_seen set is written by
+## unlock_ending() in game/routes.rpy.
+##
+## This is hand-rolled rather than built on the Gallery() class, because the
+## class is built around unlocking images and Replay actions. These endings are
+## text, and Replay-ing an ending label would re-fire the route dispatcher and
+## could overwrite route_ending with a different route.
+
+screen ending_gallery():
+
+    tag menu
+
+    use extras_menu(_("Endings"), scroll="viewport"):
+
+        style_prefix "about"
+
+        vbox:
+
+            xalign 0.5
+            yalign 0.5
+
+            spacing 10
+
+            text ending_progress_text()
+
+            null height 10
+
+            for eid, title, blurb in ENDING_LIST:
+
+                hbox:
+
+                    xalign 0.5
+                    spacing 12
+
+                    ## Fixed width so the titles line up into a column.
+                    text (title if ending_seen(eid) else _("???")) xalign 0.0 yalign 0.5 xmaximum 220
+
+                    if ending_seen(eid):
+
+                        text blurb xalign 0.0 yalign 0.5
+
+                    else:
+
+                        add "gui/button/bg_locked.jpg" yalign 0.5 xsize 64 ysize 36
+
+            null height 10
+
+            if not persistent.game_clear:
+
+                text _("Finish the game to reveal the rest.")
 
 ## Dev Notes screen ########################################
 ##
@@ -607,6 +664,16 @@ screen credits(t):
 style credits_text:
     size gui.title_text_size
     color "#ffffff"
+
+
+## Exiting the credits from the skip button. Nothing calls the credits screen
+## yet, so this is scaffolding for whenever `call screen credits(t)` is wired
+## into an ending.
+label skip_credits:
+
+    $ persistent.credits_seen = True
+
+    return
 
 
 ## Results Screen ############################################################

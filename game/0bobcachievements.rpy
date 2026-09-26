@@ -20,10 +20,11 @@
 #   (If you're using Steam, the reference_ids should be the API name of the achievements.)
 #   (This does not currently support progress stats.)
 define BOBCACHIEVEMENT_LIST = (
-    # ("EXAMPLE_ID", _("EXAMPLE TITLE"), _("EXAMPLE DESCRIPTION"), True),
     ("beginning", _("Beginning"), _("Started a new game")),
-    ("office", _("Office"), _("Went to the office")),
-    ("beach", _("Beach"), _("Went to the beach")),
+    ("mislabeled", _("Crossed Out"), _("Found the name in the ledger")),
+    ("ending_a", _("Held to the Light"), _("Reached the first ending"), True),
+    ("ending_b", _("Laid to Rest"), _("Reached the second ending"), True),
+    ("ending_c", _("Unresolved"), _("Reached the third ending"), True),
     ("completionist", _("Completionist"), _("Read all of the game"), True),
     )
 

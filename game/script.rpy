@@ -13,26 +13,31 @@ transform heavy_vignette:
     alpha 0.85
 
 transform talking:
+    ease 0.2 zoom .95
     matrixcolor BrightnessMatrix(0.0)
 
 transform not_talking:
+    ease 0.2 zoom 0.9
     matrixcolor BrightnessMatrix(-0.3)
 
 
 
 # images.
-image yun neutral = Transform("images/sprites/yun_neutral.png", zoom = 0.85)
-image yun smiling = Transform("images/sprites/yun_smiling.png", zoom = 0.85)
-image yun soft = Transform("images/sprites/yun_soft.png", zoom = 0.85)
-image yun closed = Transform("images/sprites/yun_closed.png", zoom = 0.85)
-image yun disturbed = Transform("images/sprites/yun_disturbed.png", zoom = 0.85)
-image dan neutral = Transform("images/sprites/dan_neutral.png", zoom = 0.85)
-image dan serious = Transform("images/sprites/dan_serious.png", zoom = 0.85)
-image dan smiling = Transform("images/sprites/dan_smiling.png", zoom = 0.85)
-image nestor neutral = Transform("images/sprites/nestor_neutral.png", zoom = 0.85)
-image nestor serious = Transform("images/sprites/nestor_serious.png", zoom = 0.85)
-image nestor smiling = Transform("images/sprites/nestor_smiling.png", zoom = 0.85)
+image yun neutral = Transform("images/sprites/yun_neutral.png", zoom = 0.9)
+image yun smiling = Transform("images/sprites/yun_smiling.png", zoom = 0.9)
+image yun soft = Transform("images/sprites/yun_soft.png", zoom = 0.9)
+image yun closed = Transform("images/sprites/yun_closed.png", zoom = 0.9)
+image yun disturbed = Transform("images/sprites/yun_disturbed.png", zoom = 0.9)
+image dan neutral = Transform("images/sprites/dan_neutral.png", zoom = 0.9)
+image dan serious = Transform("images/sprites/dan_serious.png", zoom = 0.9)
+image dan smiling = Transform("images/sprites/dan_smiling.png", zoom = 0.9)
+image nestor neutral = Transform("images/sprites/nestor_neutral.png", zoom = 0.9)
+image nestor serious = Transform("images/sprites/nestor_serious.png", zoom = 0.9)
+image nestor smiling = Transform("images/sprites/nestor_smiling.png", zoom = 0.9)
 image location_map = "images/BG/shop.png"
+image mortuary = "images/BG/mortuary.png"
+image pharmacy = "images/BG/pharmacy.png"
+image office = "images/BG/office.png"
 
 init python:
     def make_speaker_focus(active_tag):
@@ -108,6 +113,7 @@ image splash_anim_1:
     ease_quad 7.0 alpha 1.0 zoom 2.0
 
 default persistent.firstlaunch = False
+default persistent.seen_splash = False
 
 label splashscreen:
     
@@ -229,6 +235,8 @@ label wrong_location:
 
 label start:
 
+    achieve beginning
+
     scene room at grayscale, opening_blur
     play music dream fadein 1.0 fadeout 1.0 loop
 
@@ -238,7 +246,7 @@ label start:
 
 
     narrator "Who cannot confuse the fragile outline of dream and reality?"
-    narrator "The line between both, drawn by a delicate barrier of skin–a thin film that keeps the living self from dissolving into the imagined."
+    narrator "The line between both, drawn by a delicate barrier of skin: a thin film that keeps the living self from dissolving into the imagined."
     narrator "The body cannot always remember which side it belongs to."
 ###############################################################################################################
     # Both grey initially.
@@ -298,7 +306,7 @@ label start:
 
     stop music fadeout 1.0
 
-    scene room with Fade(0.5, 0.5, 1.0)
+    scene pharmacy with Fade(0.5, 0.5, 1.0)
     play music pharmacy fadein 1.0 fadeout 1.0 loop
 
     narrator "It is the sheep hour. He wondered when he had fallen asleep."
@@ -308,7 +316,7 @@ label start:
 
     yun '"Perhaps I brewed the tea leaves a little too well."'
 
-    narrator "The cup is still by his elbow, colder now- a thin film has formed on the surface."
+    narrator "The cup is still by his elbow, colder now. A thin film has formed on the surface."
     narrator "Shelves of dried herb rise on either side of him, dust caught in the gold light swirling in the shop front. It’s quiet."
     narrator "A peaceful quiet of a pharmacy that’s been open for business for the whole time he wasn’t awake."
     narrator "He sits up too fast, making up for a shift that’s been going on without him."
@@ -358,7 +366,8 @@ label start:
     nestor '"Another dream? Do they still chase?"'
 
     menu:
-        '"They do."':
+        '"They do."': 
+            $ acknowledge()
             yun '"They do. I just stopped running from them."'
             narrator "Yun nervously fiddles with the mortar, half-expecting disappointment from the master."
             narrator "Nestor is busy writing on paper."
@@ -397,6 +406,8 @@ label start:
             narrator "Yun finds the ledger exactly where he remembers leaving it. He flips to a list of customers, fingers running through all the names."
             yun '"There. Nyima..."'
         else:
+            scene pharmacy
+            show yun smiling
             yun '"Done and dusted. I should update the inventory."'
             narrator "Yun finds the ledger exactly where he remembers leaving it, still open and waiting for ink."
 
@@ -406,6 +417,7 @@ label start:
 
     menu:
         "Read the pages further.":
+            $ pursue()
             narrator "Yun flips back, page by page, trying to discern whose handwriting was whose."
             narrator "Where does it end? Where does Dan’s or his begin?"
             yun '{i}quietly{/i}  "There’s more than I thought."'
@@ -423,7 +435,7 @@ label start:
     narrator "Nestor doesn’t read the ledger. He closes it and hands it to Yun’s firm grasp. If he was uneasy, Yun couldn’t tell."
     narrator "Nestor always liked to keep the pharmacy tidy, the clutter predictable."
     narrator "But lately, things seem to move when no one’s looking."
-    narrator "Yun turns toward the stairwell. As he passes, the cat continues its motion- patient, unblinking. It will still be there when he returns. It always is."
+    narrator "Yun nods and turns toward the stairwell. As he passes, the cat continues its motion, patient and unblinking. It will still be there when he returns. It always is."
 
     jump shop_loop
 
@@ -434,7 +446,7 @@ label start:
 
 label PI:
 
-    scene black
+    scene office
     with fade
 
     narrator "The stairs to the PI office share a landing with the stairs that lead down the mortuary. The building’s never cared to separate the living from what awaits."
@@ -486,15 +498,17 @@ label PI:
             dan '"If Nestor isn’t worried, you shouldn’t be either. You trust him, don’t you?"'
         
         '"You think someone’s been…moving things around?"':
+            $ pursue()
             narrator "Dan looks up, studying his face for longer than he should."
             dan '"You worry too much, kid. Papers move, people forget. That’s all."'
             narrator "Dan leans back in his chair, the floor creaking beneath him."
             dan '"This building’s old. Things shift, settle. Doesn’t mean it’s out to haunt you."'
     
-    narrator "Yun nods, his hands reach for the stack of documents on the table, even as his attention shifts. He sorts through the files- and then he finds it."
+    narrator "Yun nods, his hands reach for the stack of documents on the table, even as his attention shifts. He sorts through the files…and then he finds it."
 
     if herb_mislabeled_clue_found:
         
+        $ pursue()
         narrator "A name, the very same crossed out name he found earlier. A coincidence too specific to be nothing, yet too small to be anything."
         yun '"This name… It’s the same one as the prescription downstairs."'
         narrator "Dan takes the file from him, unhurried, but to Yun it feels deliberate."
@@ -587,6 +601,7 @@ label PI:
 
     menu:
         "Bring it up to Dan.":
+            $ acknowledge()
             yun '"Could I ask you something? It’s unrelated…'
             dan '"You\'re already asking."'
             yun '"Has anyone reported a child’s bracelet missing recently? Jade. Cheap, intricate."'
@@ -626,6 +641,11 @@ label PI:
 ######################################################
 
 label mortuary:
+
+    hide dan
+    hide yun
+    scene black
+
     narrator "These stairs don’t end where he remembers. He counts them anyway, an old habit out of an old order."
     narrator "Beneath him the temperature changes before the stairwell does. Cold air comes up to greet him. It always does on the way to the mortuary."
     narrator "But today it arrived soon"
@@ -647,7 +667,12 @@ label mortuary:
     narrator "There is no mortuary at the bottom. Only more stairs."
     narrator "Then his shoulder hits a doorframe. Nestor’s voice is already mid-sentence, as if no time passed at all."
 
+    scene mortuary
+    with fade
+    show nestor smiling at left
+    with dissolve
     nestor '"-there you are. I’ll need your hands today."'
+    show yun neutral at right
     narrator "Yun nods."
     yun '"Of course."'
     narrator "Nestor gestures toward the table, to the covered form beneath the sheet."
@@ -698,7 +723,7 @@ label mortuary:
     narrator "The last of it is quiet work. Yun wipes the table in exact, measured strokes. Straight lines. No overlap. No waste."
     narrator "Too careful."
     narrator "His hand slows, then stops altogether."
-    narrator "He notices it- how rigid his wrist has become, how his breath has gone shallow."
+    narrator "He notices it. How rigid his wrist has become, how his breath has gone shallow."
     narrator "He deliberately smears the cloth in a wider arc. Messier. Human. The surface is still clean. His shoulders loosen."
     nestor '"You did well."'
     yun '"What?"'
@@ -721,6 +746,7 @@ label mortuary:
 
     menu:
         "Tell Nestor about the dream":
+            $ acknowledge()
             yun '"I dreamt of something…"'
             narrator "Nestor doesn’t look up, not right away, but his hands still. Yun learned to read that as the master giving his full attention."
             nestor '"Go on."'
@@ -746,7 +772,7 @@ label mortuary:
             nestor '"It wasn’t meant to be. It was meant to be true. I find both rarely meet in my line of work."'
             nestor '"Regardless, I do think you’re pushing yourself. I prescribed you a brew, didn’t I?"'
             yun '"It works a little too well, I think."'
-            nestor '"When it speaks- if it speaks, don’t answer right away. Wait, and wait as long as you have to, to know it is you answering."'
+            nestor '"When it speaks…if it speaks, don’t answer right away. Wait, and wait as long as you have to, to know it is you answering."'
             nestor '"The fear will always answer faster, and it is rarely ever right."'
             yun '"And if I can’t tell the difference?"'
             nestor '"Then you ask. That’s what I’m here for, on the days that I still am."'
@@ -767,15 +793,24 @@ label mortuary:
             yun '"Still. Everything is still when the work is done.I’ll leave it here… at least for now.'
             yun '"I carry the weight, but not the burden."'
             narrator "The stairs are shorter than they were coming back down. He doesn’t stop to think why."
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    return
+
+    ## Route resolution ###################################################
+    ## Runs once, at the end of the last scene. The points themselves are
+    ## awarded by acknowledge() / pursue() calls placed in the menus above;
+    ## see game/routes.rpy.
+    ##
+    ## Each ending label sets its own scene and stops the music, so this only
+    ## has to work out where to go. unlock_ending() is called by
+    ## ending_prologue, not here.
+
+    $ route_ending = resolve_route()
+
+    if route_ending == "a":
+        jump ending_a
+
+    elif route_ending == "b":
+        jump ending_b
+
+    else:
+        jump ending_c
+

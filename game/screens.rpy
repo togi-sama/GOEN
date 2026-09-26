@@ -123,7 +123,7 @@ screen say(who, what):
 
     window:
 
-        background Transform("gui/text box.png", xysize = (1280, 185), alpha = .5)
+        background Transform("gui/green.png", xysize=(1280, 185), alpha = 1.0)
 
         ### IMPORTANT: The Transform() is holding the window background, and the alpha variable ties to our say window alpha
 
@@ -1587,7 +1587,7 @@ screen quick_menu():
 
 style window:
     variant "small"
-    background "gui/phone/textbox.png"
+    background "gui/phone/text box.png"
 
 style radio_button:
     variant "small"
