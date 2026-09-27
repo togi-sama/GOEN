@@ -337,7 +337,7 @@ label start:
     nestor '"Hmm. Long enough that I served two customers while you slept through both, dear Apprentice."'
 
     show nestor neutral at left
-    show yun neutral at right
+    show yun disturbed at right
 
     yun '"I’m sorry. I don’t even remember sitting down."'
     narrator "He apologizes with the humility of someone who’s had a lot of practice getting blamed. A habit he doesn’t need around his kind master."
@@ -354,44 +354,57 @@ label start:
     nestor '"You look like you were dreaming awake rather than sleeping."'
 
     show nestor neutral at left
-    show yun neutral at right
+    show yun soft at right
 
     yun '"Is there a difference anymore? With me?"'
 
     show yun neutral at right
-    show nestor neutral at left
+    show nestor serious at left
 
     nestor '"There used to be. Lately, you seem to believe less that there is."'
     narrator "Yun doesn’t answer directly. He pushes off the counter and keeps his hands busy, back to sorting jars into the shelves. The small repetitive motions standing in for what he can’t say."
+    show nestor neutral at left
     nestor '"Another dream? Do they still chase?"'
 
     menu:
         '"They do."': 
             $ acknowledge()
+            show yun soft at right
             yun '"They do. I just stopped running from them."'
+            show yun disturbed at right
             narrator "Yun nervously fiddles with the mortar, half-expecting disappointment from the master."
             narrator "Nestor is busy writing on paper."
+            show nestor serious at left
             nestor '"There’s balance in that too. We must dream and wake in turn. Do not lose your waking hours running."'
+            show nestor neutral at left
             narrator "Somehow, coming from him, that’s enough for Yun. Nestor's voice carries like incense smoke– soft and sure. It grounds him in the afternoon light."
         
         "Stay Quiet.":
             yun '"..."'
+            show yun smiling at right
             yun '"I just need to wake up properly."'
             
     narrator "He brushes past Nestor, straightening jars, warming away the cold pull of sleep on his body."
+    show yun neutral at right
     nestor '"Waking yourself has become quite the habit. Try not to harm yourself doing it."'
     nestor '"The whole body shares the pain of even the little finger."'
+    show yun smiling at right 
     yun '"I’m getting better at telling when I’m still dreaming."'
     nestor '"Hm. Then keep your hands busy. Often it is the body that knows what’s real before the mind."'
     yun '"That’s what you’re here for."'
     narrator "Nestor smiles, not a rare sight, but always comforting."
+    show nestor smiling at left
     nestor '"You’ll be alright, Yun."'
+    show nestor neutral at left
     narrator "Nestor turns his attention to work before Yun can answer, as if the matter’s settled itself. Yun does the same, deciding to believe in his words the way he always does."
+    show yun disturbed at right
     yun '"So many prescriptions… Has everyone in this district fallen ill?"'
+    show yun neutral at right
     nestor '"Good for business, I say."'
 
-    # nestor smiling
+    show nestor smiling at left
     nestor '"And good for keeping your hands busy."'
+    show yun soft at right
     yun '"Alright. Back to work. Just match the herbs into the packet the list calls for, like usual."'
 
     # minigame start
@@ -401,6 +414,7 @@ label start:
 
         if herb_mislabeled_clue_found:
             narrator "There’s a name crossed out messily in ink. Not a habit either of them have."
+            show yun soft at right
             yun '"Hm? Was this crossed out on purpose?"'
             yun '"I should check the ledger."'
             narrator "Yun finds the ledger exactly where he remembers leaving it. He flips to a list of customers, fingers running through all the names."
@@ -412,6 +426,7 @@ label start:
             narrator "Yun finds the ledger exactly where he remembers leaving it, still open and waiting for ink."
 
     # minigame end
+    show yun neutral at right
     yun '"That\'s strange..."'
     narrator "The page he filled out before closing is gone, replaced by new entries written in a hand immediately recognized. Dan’s, his other boss on the floor above."
 
@@ -420,16 +435,21 @@ label start:
             $ pursue()
             narrator "Yun flips back, page by page, trying to discern whose handwriting was whose."
             narrator "Where does it end? Where does Dan’s or his begin?"
+            show yun soft at right
             yun '{i}quietly{/i}  "There’s more than I thought."'
             yun '"Did he stay all night writing after me?"'
             narrator "His quiet words reach Nestor still, who straightens his back and offers Yun a smile."
         
         "Ask Nestor about the writing":
+            show yun soft at right
             yun '"That\'s odd..."'
             yun '"Did Dan update this?"'
-        
+
+    show yun neutral at right
+    show nestor serious at left
     nestor '"You’ll have to ask him. Our ledgers have grown fond of each other lately."'
     yun '"It must\'ve been mixed up. I’ll take it to him."'
+    show nestor smiling at left
     nestor '"While you’re at it, do tell him to keep his paperwork off my counter next time."'
     nestor '"The living and the dead already share too many spaces."'
     narrator "Nestor doesn’t read the ledger. He closes it and hands it to Yun’s firm grasp. If he was uneasy, Yun couldn’t tell."
