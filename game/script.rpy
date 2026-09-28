@@ -13,27 +13,25 @@ transform heavy_vignette:
     alpha 0.85
 
 transform talking:
-    ease 0.2 zoom .95
     matrixcolor BrightnessMatrix(0.0)
 
 transform not_talking:
-    ease 0.2 zoom 0.9
-    matrixcolor BrightnessMatrix(-0.3)
+    matrixcolor SaturationMatrix(0.4)
 
 
 
 # images.
-image yun neutral = Transform("images/sprites/yun_neutral.png", zoom = 0.9)
-image yun smiling = Transform("images/sprites/yun_smiling.png", zoom = 0.9)
-image yun soft = Transform("images/sprites/yun_soft.png", zoom = 0.9)
-image yun closed = Transform("images/sprites/yun_closed.png", zoom = 0.9)
-image yun disturbed = Transform("images/sprites/yun_disturbed.png", zoom = 0.9)
-image dan neutral = Transform("images/sprites/dan_neutral.png", zoom = 0.9)
-image dan serious = Transform("images/sprites/dan_serious.png", zoom = 0.9)
-image dan smiling = Transform("images/sprites/dan_smiling.png", zoom = 0.9)
-image nestor neutral = Transform("images/sprites/nestor_neutral.png", zoom = 0.9)
-image nestor serious = Transform("images/sprites/nestor_serious.png", zoom = 0.9)
-image nestor smiling = Transform("images/sprites/nestor_smiling.png", zoom = 0.9)
+image yun neutral = Transform("images/sprites/yun_neutral.png", ysize =590, fit ="contain")
+image yun smiling = Transform("images/sprites/yun_smiling.png", ysize =590, fit ="contain")
+image yun soft = Transform("images/sprites/yun_soft.png", ysize =590, fit ="contain")
+image yun closed = Transform("images/sprites/yun_closed.png", ysize =590, fit ="contain")
+image yun disturbed = Transform("images/sprites/yun_disturbed.png", ysize =590, fit ="contain")
+image dan neutral = Transform("images/sprites/dan_neutral.png", ysize =590, fit ="contain")
+image dan serious = Transform("images/sprites/dan_serious.png", ysize =590, fit ="contain")
+image dan smiling = Transform("images/sprites/dan_smiling.png", ysize =590, fit ="contain")
+image nestor neutral = Transform("images/sprites/nestor_neutral.png", ysize =590, fit ="contain")
+image nestor serious = Transform("images/sprites/nestor_serious.png", ysize =590, fit ="contain")
+image nestor smiling = Transform("images/sprites/nestor_smiling.png", ysize =590, fit ="contain")
 image location_map = "images/BG/shop.png"
 image mortuary = "images/BG/mortuary.png"
 image pharmacy = "images/BG/pharmacy.png"
@@ -87,10 +85,10 @@ define yun = Character(
     image="yun",
     callback=make_speaker_focus("yun")
 )
-define woman = Character("???", color="#d69ae2")
+define woman = Character("???", color="#faf9f9")
 define dan = Character(
     "Dan",
-    color="#a2d6f9",
+    color="#faf9f9",
     image="dan",
     callback=make_speaker_focus("dan")
 )
@@ -99,7 +97,7 @@ define dan_bubble = Character("Dan", image="dan", kind = bubble)
 define nestor_bubble = Character("Nestor", image="nestor", kind = bubble)
 define nestor = Character(
     "Nestor",
-    color="#f9d6a2",
+    color="#faf9f9",
     image="nestor",
     callback=make_speaker_focus("nestor")
 )
@@ -225,7 +223,11 @@ screen shop():
 label wrong_location:
 
     scene black
-    yun '"Need to get these to Dan first."'
+    if pi_scene_complete:
+        nestor '"Yun, Come down."'
+        yun '"Can\'t keep him waiting."'
+    else:    
+        yun '"Need to get these to Dan first."'
     jump shop_loop
 
 
@@ -452,6 +454,7 @@ label start:
     show nestor smiling at left
     nestor '"While you’re at it, do tell him to keep his paperwork off my counter next time."'
     nestor '"The living and the dead already share too many spaces."'
+    show nestor neutral at left
     narrator "Nestor doesn’t read the ledger. He closes it and hands it to Yun’s firm grasp. If he was uneasy, Yun couldn’t tell."
     narrator "Nestor always liked to keep the pharmacy tidy, the clutter predictable."
     narrator "But lately, things seem to move when no one’s looking."
@@ -466,7 +469,7 @@ label start:
 
 label PI:
 
-    scene office
+    scene black
     with fade
 
     narrator "The stairs to the PI office share a landing with the stairs that lead down the mortuary. The building’s never cared to separate the living from what awaits."
@@ -478,7 +481,7 @@ label PI:
     yun '"There’s been a mix-up. You left your reports in the pharmacy."'
     narrator "Yun turns the knob and eases the door open; it creaks with a groan."
 
-    show office
+    scene office
     with fade
 
     narrator "The office greets him with the faint bite of tobacco and the warmth of sandalwood. The scent clings to the lacquered furniture and the dust on the blinds."
@@ -492,126 +495,168 @@ label PI:
 
     dan '"Another misplaced report? Tell Nestor to keep his pharmacy from eating my papers."'
 
-    show yun neutral at right
+    show yun smiling at right
     with dissolve
 
     yun '"He thinks yours wandered over first."'
+    show yun neutral
     narrator "Yun places the documents on the desk, careful not to disturb the others."
     yun '"I thought I left these here last night."'
     narrator "Dan glances at the pages, then at Yun. The man looks like he hasn’t slept either, though his sleeplessness seems earned."
     narrator "Work, not worry."
     narrator "Yun’s isn’t so easy to name."
+    show dan serious
     dan '"No one should be shuffling between my office and the pharmacy."'
+    show dan neutral
 
     menu:
         '"No one but me."':
+            show dan smiling
             dan '"Sleepwalking, then? You ought to have Nestor fix a draught. One that keeps you awake this time."'
+            show yun smiling
             yun '"I’ll ask him to make one strong enough for both of us."'
             narrator "The air lightens, the tension within Yun somewhat eased as he gives a smile."
             dan '"Let’s all try not to sort files half-asleep–your master included."'
 
-        "Yun doesn’t answer, instead tracing the edges of the paper with his thumb.":
+        "...":
+            show dan neutral
             dan '"If your silence is suggesting Nestor’s clients are moving our reports, don’t."'
             narrator "Dan leans back, the floor creaking under his weight."
             dan '"Not every strange thing that happens in this place needs a ghost behind it."'
             narrator "He says it firmly, but Yun wonders if he’s convincing himself more than anyone else."
+            show dan serious
             dan '"If Nestor isn’t worried, you shouldn’t be either. You trust him, don’t you?"'
         
         '"You think someone’s been…moving things around?"':
             $ pursue()
+            show dan serious
             narrator "Dan looks up, studying his face for longer than he should."
+            show dan smiling
             dan '"You worry too much, kid. Papers move, people forget. That’s all."'
             narrator "Dan leans back in his chair, the floor creaking beneath him."
             dan '"This building’s old. Things shift, settle. Doesn’t mean it’s out to haunt you."'
     
+    show dan neutral
+    show yun neutral
     narrator "Yun nods, his hands reach for the stack of documents on the table, even as his attention shifts. He sorts through the files…and then he finds it."
 
     if herb_mislabeled_clue_found:
         
         $ pursue()
         narrator "A name, the very same crossed out name he found earlier. A coincidence too specific to be nothing, yet too small to be anything."
+        show yun soft
         yun '"This name… It’s the same one as the prescription downstairs."'
         narrator "Dan takes the file from him, unhurried, but to Yun it feels deliberate."
         dan '"Same how?"'
         yun '"I don’t know yet. But it’s the same name as Nestor’s list."'
         narrator "Dan puts out his cigar in the ashtray, taking his time with his reply. He sets the file down, not quite dismissing it, not quite approving either."
         narrator "Yun recognizes this habit. When Dan decides how much truth a room can handle."
+        show dan serious
         dan '"Leave it with me, Yun."'
         yun '"That’s not a no."'
         dan '"It’s not a yes, either. Leave it with me."'
         narrator "Yun doesn’t budge."
         dan '"Didn’t your Master tell you not to chase too many mysteries?"'
+        show yun neutral
         yun '"This is an investigation firm."'
         dan '"Hm. That it is."'
         narrator "He pulls the file back to himself, opening it properly and deciding it is worth reading after all. Even if he won’t say it out loud."
         narrator "Yun parses through more files, arranging them."
+        show dan neutral
         dan '"Who pulled the original reports on this?"'
         yun '"You did, last spring. Before the case went cold."'
         narrator "Dan’s pen stops."
     
     else:
         narrator "As if it floats above the rest of the text, a name. It's awfully familiar to Yun. He’s never known this person but it feels important."
+        show yun soft
         yun '"This name… I feel like I know it."'
         yun '"It sounds strange, but I feel I’m missing too much, like sand falling through my fingers for not knowing. It stands out so much, but why?"'
+        show dan serious
         dan '"Like I said, you worry too much. Leave that old case to me."'
         narrator "Dan takes a long drag of his cigar, carefully breathing the smoke out the window and away from Yun."
         narrator "Yun recognizes he’s deep in thought. Not quite dismissing his concern, not quite approving either."
         narrator "Dan goes back to his own paperwork, leaving the case file on the corner of his desk. Its name unsaid, whatever it meant exactly where Yun left it."
         narrator "The scritch of the detective’s ink fills the silence. Yun parses through more files, arranging them."
+        show dan neutral
         dan '"Who pulled the original reports on the Cao business anyway? Not me."'
+        show yun smiling
         yun '"You did, last spring. Before the case went cold."'
         narrator "Dan’s pen stops."
     
     # Place Bleed Scene (check if keep or nah)
+    show dan serious
     dan '"Did you say something?"'
+    show yun soft
     yun '"I- Yes I did. Just now."'
     yun '"You asked who pulled the original reports."'
+    show dan neutral
     dan '"I didn’t, I thought it. Don’t recall saying it out loud."'
     narrator "The silence is uncomfortable."
+    show yun disturbed
     yun '"...I need to sit down."'
     dan '"Yun."'
     yun '"I’m fine, it’s just- I heard you say something you didn’t say."'
     narrator "He sits. The room stays exactly as it is- smoke curling out the window, the ledger, and the files scattered on the desk."
     dan '"Say that again. Slowly this time."'
+    show yun soft
     yun '"You asked who pulled the original reports. I answered you. Then you told me you never asked it out loud."'
-    dan '"Because I didn\'t"'
+    dan '"Because I didn\'t."'
     yun '"I know. That\'s the part I\'m having trouble with…"'
     dan '"Kid, when’s the last time you slept? Actually slept. Not whatever it is you do on Nestor’s counter."'
     yun '"That’s not what this is."'
     narrator "Yun’s reply comes off more defensive than he’d like."
     dan'"I didn’t say it was. Answer me."'
+    show yun disturbed
     yun '"I..."'
+    show yun soft
     yun '"I don’t know. A while."'
+    show yun neutral
     narrator "Dan exhales through his nose, it’s not quite a sigh."
+    show yun soft
     yun '"Don’t you burn the midnight oil too, Captain?"'
     narrator "Yun doesn’t miss the twitch in Dan’s eye at the title. It was a slip of the tongue."
+    show dan serious
     dan '"I’ll pretend I didn’t hear that."'
     dan '"You’ve been running on fumes and- and dream-logic for I don’t know how long."'
     dan '"And you expect me to believe you heard my thoughts and it’s not just your ears getting ahead of your sense?"'
+    show yun disturbed
     yun '"I know how it sounds."'
+    show dan neutral
     dan '"Do you? Because it sounds to me like you’re exhausted, Yun. It sounds like too many nights arguing with something that isn’t in the room."'
     dan '"And now you’re expecting that everywhere, even outside of those nights."'
     narrator "Yun doesn’t answer right away. He thinks some of what Dan is saying might be fair."
+    show yun soft
     yun '"Maybe. I’ve thought that too. More than once, Dan."'
     dan '"But?"'
     yun '"But every time I go looking for answers there’s always something after it. Something that thinking-through can’t explain. That my exhaustion can’t be the answer."'
     narrator "Dan observes Yun carefully, and for a long moment, he gives him the same look he gave the ledger. One deciding whether this strangeness deserves investigation or dismissal."
+    show dan serious
     dan '"Alright, kid. Say I believe you heard something. Whether the building’s whispers or mine. What did I say exactly?"'
+    show yun neutral
     yun '"You asked who pulled the original reports. And I told you, you did. Last spring, before the case went cold."'
+    show dan neutral
     dan '"That’s true. For what it’s worth."'
+    show yun soft
     yun '"I know. I don’t know how I knew that though."'
     narrator "Dan sets his jaw, the closest he comes to looking genuinely unsettled rather than skeptical. He finds he’s been doing that more in this building."
     dan '"So either you’re pulling facts about my casework from somewhere you shouldn’t have access to, or-"'
+    show yun disturbed
     yun '"Or I’m just tired like you said."'
+    show dan smiling
     dan '"I was going to say that I might have forgotten I even said anything. Which would be rather silly of me. A far more mundane reason that I\'d prefer."'
     #smiling
+    show yun smiling
     yun '"I’d prefer that too."'
     narrator "Neither of them say anything for a while. The incense burns out and the scent of tobacco is winning again, like it always does."
     dan '"Drink some water, kid. I’m not sending you back down shaking like that. Nestor would have my head."'
     dan '"And rightly."'
-    yun '"I’m alright"'
+    yun '"I’m alright."'
+    show dan serious
     dan '"You said that earlier, I’m not taking my chances. I didn’t believe you the first time either."'
     narrator "Yun manages something like a smile, though it doesn’t hold for long. His eyes drift towards the ledger without really meaning to."
+    show yun disturbed
+    hide dan 
     narrator "It’s disturbing, now that Yun’s sat down and thought about it."
     narrator "Nothing marked the moment as false as it happened. The only proof of it not being real was Dan saying so."
     narrator "And Dan could always, in principle, be lying too."
@@ -622,33 +667,45 @@ label PI:
     menu:
         "Bring it up to Dan.":
             $ acknowledge()
+            show yun soft
             yun '"Could I ask you something? It’s unrelated…'
+            show dan neutral
             dan '"You\'re already asking."'
             yun '"Has anyone reported a child’s bracelet missing recently? Jade. Cheap, intricate."'
             narrator "Dan’s face doesn’t change quickly enough to hide what it wanted to."
+            show dan serious
             dan '"Why do you ask?"'
+            show yun disturbed
             yun '"I don’t know. It’s just been on my mind."'
             dan '"That’s not an answer, Yun."'
             yun '"It’s the only one I have."'
             narrator "Dan doesn’t say anything for a moment too long, certainly longer than the question deserves."
             narrator "A bell chimes from somewhere in the building."
             dan '"Damn quack really doesn’t like to share employees."'
+            show yun smiling
             yun '"Nestor did mention he needed me downstairs as soon as I could. Downstairs downstairs."'
+            show dan neutral
             dan '"Is it urgent?"'
+            show yun soft
             yun '"He didn’t say. But I rarely get to help in the mortuary. I can’t keep him waiting."'
             dan '"Figures. The living are a second thought in this building."'
-            #smiling
+            show yun smiling
             yun '"Don’t be like that, Captain. I’ll be quick."'
             dan '"I’ll look into it. Go on, Nestor’s waiting on you."'
+            show dan smiling
             dan '"Unless you’d rather sit here with me worrying about jewelry, which I prefer you not. Your master will have a great say in my always hogging your time."'
             yun '"I’ll take the excuse to leave actually."'
             dan '"Smart man."'
         
         "Ask about going downstairs.":
             narrator "A bell chimes from somewhere in the building."
+            show yun disturbed
             yun '"Nestor needs me downstairs. I should go."'
+            show dan serious
             dan '"Running from me or the conversation?"'
+            show yun smiling
             yun '"Can’t it be both?"'
+            show dan neutral
             dan '"Fair enough. Go on, then."'
             narrator "Yun leaves the thought unsaid. Whatever the thought was stays exactly as it is."
             yun '"Thank you, Dan."'
@@ -692,126 +749,187 @@ label mortuary:
     show nestor smiling at left
     with dissolve
     nestor '"-there you are. I’ll need your hands today."'
-    show yun neutral at right
+    show yun neutral 
     narrator "Yun nods."
+    show yun soft at right
     yun '"Of course."'
     narrator "Nestor gestures toward the table, to the covered form beneath the sheet."
+    show nestor neutral
     nestor '"Nothing complicated. Just help me bring him up, keep things steady. If you feel yourself drifting, say so. We can slow down."'
     narrator "Yun draws a quiet breath."
+    show yun neutral
     yun '"Alright."'
     narrator "Nestor turns back to the table, already reaching for the cloth. Yun stands behind Nestor, blocking the draft from the staircase."
     narrator "His posture is stiff, arms locked at parade rest. An old habit his body always reaches for."
     narrator "Nestor opens a tin of balm, the metal sliding softly in his hands."
+    show nestor serious
     nestor '"Follow my movement. We go together."'
     narrator "Yun doesn’t notice he’s holding his breath."
     nestor '"At ease."'
+    show yun soft
     yun '"Right..."'
+    show nestor neutral
     nestor '"The wind moves freely. You can too, Yun. Don’t hold yourself hostage to stillness."'
     narrator "The body waits. So do they."
+    show yun disturbed
     narrator "Yun steps closer, the floor cold under his shoes. Fingers hover over the sheet, hesitant. And the strange urge to apologize is swallowed before it becomes a word."
     narrator "The weight…of a person in death. The same weight he carries from his dreams."
     narrator "He sees himself in the cadaver. He shouldn’t."
     narrator "Still, he wonders if he too is weightless-yet burdened- when he is not awake."
+    show yun soft
     yun '"Should I lift it…like this?"'
+    show nestor serious
     nestor '"Carry the weight with your arms, Yun. Not your mind. Feel it, don’t think it."'
     yun '"Like this."'
+    show nestor smiling
     nestor '"Better."'
+    show yun neutral
+    show nestor neutral
     narrator "Nestor works beneath and around what Yun holds steady, completely trusting Yun to lift."
     nestor '"You are stronger than you look, dear Apprentice."'
+    show yun soft
     yun '"It’s heavier than I expected. Nothing I can’t carry. Just…strange."'
+    show nestor serious
     nestor '"Burdens do not weigh the body post mortem. Still, it is not light–the weight of death."'
+    show yun closed
+    show nestor neutral
     narrator "Yun’s eyes briefly catch the tin beside them. For a moment it isn’t his reflection he half-sees there."
+    show yun soft
     narrator "A man in uniform. A version of himself he has tried to no longer answer to."
+    show yun closed
     narrator "He blinks, and it’s Yun again."
+    show yun soft
     yun '"He looks…young."'
+    show nestor serious
     nestor '"He is."'
+    show yun disturbed
     yun '"That doesn’t feel right."'
     nestor '"No. But such is the way of things. It was his life to finish."'
     yun '"Sometimes I think… if I’d done more. If I were faster. Better. Maybe some of them wouldn’t be down here."'
+    show nestor neutral
     nestor '"You are very fond of bargaining with time."'
+    show yun soft
     yun '"I don’t like wasting it."'
     yun '"My existence, I can justify it… Not for any reason like my right to live. But because I’m needed. I have to be."'
     nestor '"You say that like it isn’t enough that you are here."'
     yun '"Is it?"'
     nestor '"An old argument. You’ve had it with yourself longer than with me."'
     narrator "Nestor wipes his hands on a cloth, allowing Yun to think in the pause."
+    show nestor serious
     nestor '"I suggest you learn from your mistakes. Suffer less for them. Doctor’s advice."'
-    #smiling
+    show yun smiling
     yun '"You’re not a doctor."'
-    #smiling
+    show nestor smiling
     nestor '"My clients would say I am. In a way."'
+    show nestor neutral
+    show yun neutral
     narrator "The last of it is quiet work. Yun wipes the table in exact, measured strokes. Straight lines. No overlap. No waste."
     narrator "Too careful."
     narrator "His hand slows, then stops altogether."
+    show yun soft
     narrator "He notices it. How rigid his wrist has become, how his breath has gone shallow."
     narrator "He deliberately smears the cloth in a wider arc. Messier. Human. The surface is still clean. His shoulders loosen."
+    show nestor smiling
     nestor '"You did well."'
     yun '"What?"'
+    show nestor neutral
     nestor '"I\'ve seen you do that correction over the years. Tight, then loose, and now honest."'
+    show yun smiling
     yun '"Is that a compliment?"'
+    show nestor serious
     nestor '"It’s an observation. Take it how you will, you of all people know what my compliments are like."'
+    show nestor smiling
     narrator "Yun almost laughs. The lightness and humor of it shifts something inside his chest and eases the tension he doesn’t realize was there."
+    show nestor neutral
     nestor '"Keep your hands busy a little longer. Slower, if you need to. Even the wind doesn’t rush, and yet it gets everywhere it needs to."'
+    show yun soft
     yun '"You make it sound so easy. I… can’t be anything like wind."'
+    show nestor serious
     nestor '"I make it sound possible, dear apprentice. Trust in yourself a little more."'
+    show yun neutral
     narrator "Yun does as Nestor says. He works, he keeps his hands busy."
     woman '"Don’t wake up."'
+    show nestor smiling
     nestor '"What a lovely tune."'
+    show yun soft
     yun '"Hm?"'
     nestor '"You’re humming. I don’t recognize the melody."'   
-    #smiling
+    show yun smiling
     yun '"I don’t either."'
     narrator "There’s a slight tremble to his fingers as he grabs the herbs and incense. He hands them to Nestor, proud to have remembered without being told."
+    show nestor neutral
     narrator "Nestor stays quiet, doesn’t reply, his fingers busy wiping a bowl. He doesn’t look away either. He leaves the door-the conversation- open without forcing anyone to walk through."
 
     menu:
         "Tell Nestor about the dream":
             $ acknowledge()
+            show yun soft
             yun '"I dreamt of something…"'
             narrator "Nestor doesn’t look up, not right away, but his hands still. Yun learned to read that as the master giving his full attention."
             nestor '"Go on."'
             yun '"A woman. I don’t see her clearly, just what she’s holding. A child’s bracelet."'
             nestor '"Does she speak to you?"'
+            show yun disturbed
             yun '"No… I don’t know. The others do, sometimes I can’t tell."'
             narrator "Nestor sets the bowl down now, turning to face Yun properly."
+            show nestor serious
             nestor '"Then she’s not one of them. Not the same haunting, at least. Not now…maybe not ever."'
+            show yun soft
             yun '"How do you know for sure?"'
             nestor '"I don’t, not for certain. But if the dream is still voiceless then maybe it’s a different kind of visitor than the ones that have your name memorized."'
+            show yun disturbed
             yun '"But if she did say something?"'
             nestor '"Give it time before you decide what it wants with you."'    
+            show yun smiling
             yun '"Upstairs, Dan thinks I was just tired."'
             nestor '"Dan thinks everyone is tired. I don’t begrudge him for it. It\'s comfortable to believe."'
             nestor '"Especially for a man like the detective who’s spent his whole career needing explanations for everything. Ghosts don’t make reports after all."'
-            #smiling
+            show yun smiling
             yun '"I think he’s afraid of ghosts."'
-            #smiling
+            show nestor smiling
             nestor '"Unlucky for him then to share the same building with us who aren’t."'
+            show yun soft
             yun '"You don’t think I’m tired?"'
+            show nestor serious
             nestor '"I think you’re both tired and something else. And only one of those sleep can fix."'
             nestor '"That’s not very reassuring."'
             nestor '"It wasn’t meant to be. It was meant to be true. I find both rarely meet in my line of work."'
+            show nestor smiling
             nestor '"Regardless, I do think you’re pushing yourself. I prescribed you a brew, didn’t I?"'
+            show yun smiling
             yun '"It works a little too well, I think."'
+            show nestor serious
             nestor '"When it speaks…if it speaks, don’t answer right away. Wait, and wait as long as you have to, to know it is you answering."'
             nestor '"The fear will always answer faster, and it is rarely ever right."'
+            show yun soft
             yun '"And if I can’t tell the difference?"'
+            show nestor smiling
             nestor '"Then you ask. That’s what I’m here for, on the days that I still am."'
+            show yun smiling
             nestor '"Or Dan. For what it’s worth that man cares more than he lets on."'
 
         "Say Nothing.":
+            show yun neutral
+            show nestor neutral
             narrator "Yun returns to cleaning the remaining tools on the table, the clink of porcelain and metal doing the talking he isn’t ready to."
             narrator "Nestor doesn’t push, he never does. He only keeps the door open for when Yun is ready, now or for the next."
+            show nestor serious
             nestor '"You tell me when it’s ready to be told. Or don’t. Then I’ll just guess like always."'
+            show yun soft
             yun '"You’re a very patient man."'
-            #smiling
+            show yun smiling
             yun '"Must be because you’re always with people who can’t complain."'
-            #smiling
+            show nestor smiling
             nestor '"One of the few advantages of my job."'
+            hide nestor
             narrator "Nestor returns to the pharmacy first, a bell chimes from somewhere."
+            show yun neutral
             narrator "Yun is alone now, drifting between dream and waking. The barrier is weaker here than it’s been all day."
             narrator "He can’t help but whisper to himself. Reassurance mostly."
+            show yun soft
             yun '"Still. Everything is still when the work is done.I’ll leave it here… at least for now.'
             yun '"I carry the weight, but not the burden."'
+            hide yun
             narrator "The stairs are shorter than they were coming back down. He doesn’t stop to think why."
 
     ## Route resolution ###################################################

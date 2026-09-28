@@ -123,7 +123,7 @@ screen say(who, what):
 
     window:
 
-        background Transform("gui/green.png", xysize=(1280, 185), alpha = 1.0)
+        add Transform("gui/green.png", yzoom=0.4, yoffset=-140, alpha = 1.0)
 
         ### IMPORTANT: The Transform() is holding the window background, and the alpha variable ties to our say window alpha
 
@@ -169,7 +169,7 @@ style window:
     xfill True
     yalign gui.textbox_yalign
     ysize gui.textbox_height
-    background "gui/text box.png"
+
 
 style namebox:
     xpos gui.name_xpos

@@ -414,7 +414,7 @@ define gui.nvl_name_xalign = 1.0
 ## The position, width, and alignment of the dialogue text.
 define gui.nvl_text_xpos = 450
 define gui.nvl_text_ypos = 8
-define gui.nvl_text_width = 590
+define gui.nvl_text_width = 650
 define gui.nvl_text_xalign = 0.0
 
 ## The position, width, and alignment of nvl_thought text (the text said by the

@@ -194,7 +194,7 @@ label ending_prologue(ending_id):
 
     ## Granting through the python entry point rather than the `achieve`
     ## statement, because the id is a parameter here.
-    $ bobcachievement_grant(ending_id)
+    $ bobcachievement_grant("ending_" + ending_id)
 
     ## Idempotent, and also covers a player who arrives here via Replay or a
     ## loaded save rather than through the dispatcher.
