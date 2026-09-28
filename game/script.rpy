@@ -373,7 +373,7 @@ label start:
             $ acknowledge()
             show yun soft at right
             yun '"They do. I just stopped running from them."'
-            show yun disturbed at right
+            show yun closed at right
             narrator "Yun nervously fiddles with the mortar, half-expecting disappointment from the master."
             narrator "Nestor is busy writing on paper."
             show nestor serious at left
@@ -448,7 +448,7 @@ label start:
             yun '"Did Dan update this?"'
 
     show yun neutral at right
-    show nestor serious at left
+    show nestor neutral at left
     nestor '"You’ll have to ask him. Our ledgers have grown fond of each other lately."'
     yun '"It must\'ve been mixed up. I’ll take it to him."'
     show nestor smiling at left
@@ -551,14 +551,16 @@ label PI:
         yun '"I don’t know yet. But it’s the same name as Nestor’s list."'
         narrator "Dan puts out his cigar in the ashtray, taking his time with his reply. He sets the file down, not quite dismissing it, not quite approving either."
         narrator "Yun recognizes this habit. When Dan decides how much truth a room can handle."
-        show dan serious
+        show dan neutral
         dan '"Leave it with me, Yun."'
         yun '"That’s not a no."'
+        show dan serious
         dan '"It’s not a yes, either. Leave it with me."'
         narrator "Yun doesn’t budge."
         dan '"Didn’t your Master tell you not to chase too many mysteries?"'
         show yun neutral
         yun '"This is an investigation firm."'
+        show dan smiling
         dan '"Hm. That it is."'
         narrator "He pulls the file back to himself, opening it properly and deciding it is worth reading after all. Even if he won’t say it out loud."
         narrator "Yun parses through more files, arranging them."
@@ -604,12 +606,12 @@ label PI:
     dan '"Because I didn\'t."'
     yun '"I know. That\'s the part I\'m having trouble with…"'
     dan '"Kid, when’s the last time you slept? Actually slept. Not whatever it is you do on Nestor’s counter."'
+    show yun closed
     yun '"That’s not what this is."'
     narrator "Yun’s reply comes off more defensive than he’d like."
     dan'"I didn’t say it was. Answer me."'
-    show yun disturbed
     yun '"I..."'
-    show yun soft
+    show yun neutral
     yun '"I don’t know. A while."'
     show yun neutral
     narrator "Dan exhales through his nose, it’s not quite a sigh."
@@ -620,7 +622,7 @@ label PI:
     dan '"I’ll pretend I didn’t hear that."'
     dan '"You’ve been running on fumes and- and dream-logic for I don’t know how long."'
     dan '"And you expect me to believe you heard my thoughts and it’s not just your ears getting ahead of your sense?"'
-    show yun disturbed
+    show yun closed
     yun '"I know how it sounds."'
     show dan neutral
     dan '"Do you? Because it sounds to me like you’re exhausted, Yun. It sounds like too many nights arguing with something that isn’t in the room."'
@@ -641,7 +643,7 @@ label PI:
     yun '"I know. I don’t know how I knew that though."'
     narrator "Dan sets his jaw, the closest he comes to looking genuinely unsettled rather than skeptical. He finds he’s been doing that more in this building."
     dan '"So either you’re pulling facts about my casework from somewhere you shouldn’t have access to, or-"'
-    show yun disturbed
+    show yun closed
     yun '"Or I’m just tired like you said."'
     show dan smiling
     dan '"I was going to say that I might have forgotten I even said anything. Which would be rather silly of me. A far more mundane reason that I\'d prefer."'
@@ -675,7 +677,7 @@ label PI:
             narrator "Dan’s face doesn’t change quickly enough to hide what it wanted to."
             show dan serious
             dan '"Why do you ask?"'
-            show yun disturbed
+            show yun closed
             yun '"I don’t know. It’s just been on my mind."'
             dan '"That’s not an answer, Yun."'
             yun '"It’s the only one I have."'
@@ -725,7 +727,7 @@ label mortuary:
 
     narrator "These stairs don’t end where he remembers. He counts them anyway, an old habit out of an old order."
     narrator "Beneath him the temperature changes before the stairwell does. Cold air comes up to greet him. It always does on the way to the mortuary."
-    narrator "But today it arrived soon"
+    narrator "But today it arrived too soon."
     narrator "Yun stares into the void. The stairs seem longer by the second."
     narrator "A bracelet catches light before he sees who’s holding it."
     woman '"You’re going the wrong way."'
@@ -762,7 +764,7 @@ label mortuary:
     narrator "Nestor turns back to the table, already reaching for the cloth. Yun stands behind Nestor, blocking the draft from the staircase."
     narrator "His posture is stiff, arms locked at parade rest. An old habit his body always reaches for."
     narrator "Nestor opens a tin of balm, the metal sliding softly in his hands."
-    show nestor serious
+    show nestor smiling
     nestor '"Follow my movement. We go together."'
     narrator "Yun doesn’t notice he’s holding his breath."
     nestor '"At ease."'
@@ -771,7 +773,7 @@ label mortuary:
     show nestor neutral
     nestor '"The wind moves freely. You can too, Yun. Don’t hold yourself hostage to stillness."'
     narrator "The body waits. So do they."
-    show yun disturbed
+    show yun closed
     narrator "Yun steps closer, the floor cold under his shoes. Fingers hover over the sheet, hesitant. And the strange urge to apologize is swallowed before it becomes a word."
     narrator "The weight…of a person in death. The same weight he carries from his dreams."
     narrator "He sees himself in the cadaver. He shouldn’t."
@@ -787,22 +789,22 @@ label mortuary:
     show nestor neutral
     narrator "Nestor works beneath and around what Yun holds steady, completely trusting Yun to lift."
     nestor '"You are stronger than you look, dear Apprentice."'
-    show yun soft
+    show yun closed
     yun '"It’s heavier than I expected. Nothing I can’t carry. Just…strange."'
-    show nestor serious
+    show nestor neutral
     nestor '"Burdens do not weigh the body post mortem. Still, it is not light–the weight of death."'
     show yun closed
     show nestor neutral
     narrator "Yun’s eyes briefly catch the tin beside them. For a moment it isn’t his reflection he half-sees there."
-    show yun soft
+    show yun neutral
     narrator "A man in uniform. A version of himself he has tried to no longer answer to."
     show yun closed
     narrator "He blinks, and it’s Yun again."
-    show yun soft
+    show yun neutral
     yun '"He looks…young."'
     show nestor serious
     nestor '"He is."'
-    show yun disturbed
+    show yun closed
     yun '"That doesn’t feel right."'
     nestor '"No. But such is the way of things. It was his life to finish."'
     yun '"Sometimes I think… if I’d done more. If I were faster. Better. Maybe some of them wouldn’t be down here."'
@@ -810,8 +812,10 @@ label mortuary:
     nestor '"You are very fond of bargaining with time."'
     show yun soft
     yun '"I don’t like wasting it."'
+    show yun closed
     yun '"My existence, I can justify it… Not for any reason like my right to live. But because I’m needed. I have to be."'
     nestor '"You say that like it isn’t enough that you are here."'
+    show yun neutral
     yun '"Is it?"'
     nestor '"An old argument. You’ve had it with yourself longer than with me."'
     narrator "Nestor wipes his hands on a cloth, allowing Yun to think in the pause."
@@ -863,13 +867,13 @@ label mortuary:
     menu:
         "Tell Nestor about the dream":
             $ acknowledge()
-            show yun soft
+            show yun neutral
             yun '"I dreamt of something…"'
             narrator "Nestor doesn’t look up, not right away, but his hands still. Yun learned to read that as the master giving his full attention."
             nestor '"Go on."'
             yun '"A woman. I don’t see her clearly, just what she’s holding. A child’s bracelet."'
             nestor '"Does she speak to you?"'
-            show yun disturbed
+            show yun closed
             yun '"No… I don’t know. The others do, sometimes I can’t tell."'
             narrator "Nestor sets the bowl down now, turning to face Yun properly."
             show nestor serious
@@ -877,11 +881,12 @@ label mortuary:
             show yun soft
             yun '"How do you know for sure?"'
             nestor '"I don’t, not for certain. But if the dream is still voiceless then maybe it’s a different kind of visitor than the ones that have your name memorized."'
-            show yun disturbed
+            show yun neutral
             yun '"But if she did say something?"'
             nestor '"Give it time before you decide what it wants with you."'    
             show yun smiling
             yun '"Upstairs, Dan thinks I was just tired."'
+            show nestor neutral
             nestor '"Dan thinks everyone is tired. I don’t begrudge him for it. It\'s comfortable to believe."'
             nestor '"Especially for a man like the detective who’s spent his whole career needing explanations for everything. Ghosts don’t make reports after all."'
             show yun smiling
@@ -892,11 +897,12 @@ label mortuary:
             yun '"You don’t think I’m tired?"'
             show nestor serious
             nestor '"I think you’re both tired and something else. And only one of those sleep can fix."'
-            nestor '"That’s not very reassuring."'
+            show yun smiling
+            yun '"That’s not very reassuring."'
+            show nestor neutral
             nestor '"It wasn’t meant to be. It was meant to be true. I find both rarely meet in my line of work."'
             show nestor smiling
             nestor '"Regardless, I do think you’re pushing yourself. I prescribed you a brew, didn’t I?"'
-            show yun smiling
             yun '"It works a little too well, I think."'
             show nestor serious
             nestor '"When it speaks…if it speaks, don’t answer right away. Wait, and wait as long as you have to, to know it is you answering."'
