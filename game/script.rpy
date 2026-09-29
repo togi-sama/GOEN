@@ -146,15 +146,6 @@ label splashscreen:
  
         pass
 
-    ## The game now goes straight to the main menu. To restore the old
-    ## first-launch flow (content warning -> settings page -> preferences),
-    ## uncomment the block below.
-    # call screen content_warning
-    #
-    # call screen splash_settings
-    #
-    # call screen preferences
-
     return
 
 
@@ -184,7 +175,6 @@ screen shop():
 
     add "images/BG/shop.png"
 
-
     # Left -- Mortuary
     imagebutton:
         idle Solid("#00000000")
@@ -204,15 +194,15 @@ screen shop():
     imagebutton:
         idle Solid("#00000000")
         hover Solid("#ffffff12")
-        xpos 459
-        ypos 144
-        xsize 357
-        ysize 546
+        xpos 458
+        ypos 47
+        xsize 358
+        ysize 645
         if not pi_scene_complete:
             action Return("PI")
         else:
             action Return("wrong")
-        hovered SetScreenVariable("shop_hovered", ("Office", 637, 160))
+        hovered SetScreenVariable("shop_hovered", ("Office", 637, 52))
         unhovered SetScreenVariable("shop_hovered", None)
 
     # Right -- Pharmacy (no scene yet -> wrong_location)
