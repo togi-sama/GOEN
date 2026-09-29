@@ -276,68 +276,35 @@ style choice_button_text is default:
 ## The quick menu is displayed in-game to provide easy access to the out-of-game
 ## menus.
 
-## The quick menu is a tab at the top right that expands into a vertical panel
-## of buttons. Both are painted art from gui/button/menu. The panel art also
-## bakes in a second side-button tab at its top-left, which is what collapses
-## the panel again (see the hotspot in quick_menu_panel).
-##
-## Asset geometry (measured from the alpha masks, both are white art so they're
-## invisible against a white background):
-##
-##   side button.png  -- 81x121 canvas, art at x 37..80, y 12..114 (44x103).
-##                       A rounded tab with three horizontal lines, flush
-##                       against the canvas's RIGHT edge.
-##   quick_menu.png   -- shipped as a full 1280x720 canvas. The panel body is
-##                       at x 1084..1279, y 99..490 (196x392) with a second
-##                       side-button tab protruding to its left at
-##                       x 1039..1086, y 106..212. The panel screens crop it
-##                       (see quick_menu_panel) to a 273x436 canvas: 32px of
-##                       left padding, then the tab, then the body. In crop-
-##                       local coordinates the body spans x 77..272, y 19..410,
-##                       and the tab x 32..79, y 26..132.
-##
-## side button.png is added uncropped at xalign 1.0 and its left padding hangs
-## off-screen; quick_menu.png is cropped first and then right-aligned. When
-## right-aligned, quick_menu.png's art covers screen x 1039..1280, and side
-## button.png's art covers screen x 1236..1280.
-##
-## How the animation works
-## -----------------------
-## Ren'Py 8.5's ATL has no "if" statement, so a transform can't react to
-## quick_menu_open on its own. The panel is therefore a separate screen that
-## QuickMenuToggle shows and hides imperatively, and the slide lives in its
-## "on show"/"on hide" hooks -- the same mechanism screen notify uses for its
-## fade out. Ren'Py keeps the screen alive until the on-hide animation
-## finishes, which is what lets the panel slide away instead of blinking out.
-##
-## The closed tab (top right) lives in the overlay screen below and simply
-## isn't drawn while the panel is open, so it vanishes the instant the panel
-## opens rather than sliding along with it. Closing brings it straight back.
-## Collapsing is handled instead by an invisible hotspot over the tab baked
-## into the panel art's own top-left corner (see quick_menu_panel).
-##
-## The panel screen is shown/hidden imperatively by QuickMenuToggle rather than
-## with "use", because a "use"d child can't carry an on-show animation.
-##
-## The hover lean works differently, because it must move the button's hitbox as
-## well as its art (see quick_menu_tab_hover). Since ATL can't branch, the tab
-## screen picks between two transforms on a quick_menu_hover store variable and
-## restarts the interaction when it flips.
 
 init python:
+
+    ## Open/hover state for the quick menu. Held on a NoRollback object rather
+    ## than in plain store variables so that rolling back -- including via the
+    ## panel's own Back button, whose action is Rollback() -- does not revert
+    ## the panel's open/closed state. Ordinary variables participate in
+    ## rollback, which is what used to make Back collapse the panel.
+    class QuickMenuState(NoRollback):
+
+        def __init__(self):
+            self.open = False
+            self.hover = False
+
+    quick_menu_state = QuickMenuState()
+
     class QuickMenuToggle(Action):
         """
         Opens or closes the quick menu panel, sliding it in and out.
         """
         def __call__(self):
-            store.quick_menu_open = not store.quick_menu_open
+            quick_menu_state.open = not quick_menu_state.open
 
             ## No zorder kwarg here on purpose: show_screen's parameter is
             ## _zorder, and any keyword that doesn't start with an underscore
-            ## gets forwarded to the screen as a constructor argument -- which
-            ## this argument-less screen rejects. The screen sets its own
-            ## zorder in its body instead.
-            if store.quick_menu_open:
+            ## gets forwarded to the screen as a constructor argument -- so an
+            ## unknown one would be passed to the screen. The screen sets its
+            ## own zorder in its body instead.
+            if quick_menu_state.open:
                 renpy.show_screen("quick_menu_panel")
             else:
 
@@ -348,11 +315,22 @@ init python:
                 ## unhovered either. Left alone, a True from the click that
                 ## opened the panel would stick, and the closed tab would stay
                 ## drawn in its leaned branch forever.
-                store.quick_menu_hover = False
+                quick_menu_state.hover = False
 
                 renpy.hide_screen("quick_menu_panel")
 
             renpy.restart_interaction()
+
+    def _quick_menu_after_rollback():
+        ## Rollback restores the scene list, which drops the imperatively shown
+        ## panel even though quick_menu_state.open is a NoRollback value and so
+        ## survives. Re-show it here -- without the slide-in, so it just stays
+        ## in place -- whenever a rollback reopening finds it missing.
+        if renpy.game.after_rollback:
+            if quick_menu_state.open and not renpy.get_screen("quick_menu_panel"):
+                renpy.show_screen("quick_menu_panel", anim=False)
+
+    config.interact_callbacks.append(_quick_menu_after_rollback)
 
 
 ## The always-visible tab in its closed, un-hovered position: art at
@@ -390,15 +368,16 @@ transform quick_menu_tab_hover:
     ypos 40
     xoffset 0
 
-## The panel. 273 is the cropped canvas width, so xoffset 273 parks it entirely
+## The panel. 273 is the fixed's width, so xoffset 273 parks the panel entirely
 ## off screen to the right.
 ##
-## ypos 36 top-aligns the panel art with the tab art: the panel art starts at
-## canvas y 16 (36 + 16 = 52) and the tab art starts at canvas y 12 (40 + 12 =
-## 52), so both begin on the same scanline.
+## ypos 0 lets the panel art sit at its own canvas coordinates: the artwork was
+## drawn directly on the screen, so the body's top (canvas y 56) lines up with
+## the closed tab art (screen y ~52). The image itself is right-aligned inside
+## the fixed, so canvas x is screen x as well.
 transform quick_menu_panel_anim:
     xalign 1.0
-    ypos 36
+    ypos 0
 
     xsize 273
     ysize 436
@@ -410,6 +389,19 @@ transform quick_menu_panel_anim:
     on hide:
         xoffset 0
         linear 0.20 xoffset 273
+
+
+## The same final resting position as quick_menu_panel_anim, but with no
+## show/hide animation. Used when the panel is re-shown after a rollback so it
+## simply reappears already open instead of sliding in again.
+transform quick_menu_panel_static:
+    xalign 1.0
+    ypos 0
+
+    xsize 273
+    ysize 436
+
+    xoffset 0
 
 
 ## Overlay screen: the closed tab, plus the quick_menu/main_menu gating.
@@ -425,9 +417,9 @@ screen quick_menu():
 
     ## not main_menu keeps this off the main menu and off the Load/About/
     ## Preferences screens, which are all "menu" screens reached via ShowMenu.
-    ## not quick_menu_open hides the closed tab entirely once the panel is
-    ## open, so pressing it makes it vanish rather than slide.
-    if quick_menu and not main_menu and not quick_menu_open:
+    ## not quick_menu_state.open hides the closed tab entirely once the panel
+    ## is open, so pressing it makes it vanish rather than slide.
+    if quick_menu and not main_menu and not quick_menu_state.open:
 
         ## Two near-identical buttons rather than one button with a shifted
         ## hover image. Only the "at" line differs; see
@@ -447,7 +439,7 @@ screen quick_menu():
         ## full 81x121 canvas, which is what focus_mask wants. Adding
         ## xpadding/ypadding would grow the button and offset the child image
         ## inward, leaving a visible gap at the right screen edge.
-        if quick_menu_hover:
+        if quick_menu_state.hover:
 
             imagebutton:
 
@@ -458,7 +450,7 @@ screen quick_menu():
 
                 action QuickMenuToggle()
 
-                unhovered SetVariable("quick_menu_hover", False)
+                unhovered SetField(quick_menu_state, "hover", False)
 
         else:
 
@@ -471,11 +463,11 @@ screen quick_menu():
 
                 action QuickMenuToggle()
 
-                hovered SetVariable("quick_menu_hover", True)
+                hovered SetField(quick_menu_state, "hover", True)
 
 
 ## The expanded panel. Shown/hidden by QuickMenuToggle.
-screen quick_menu_panel():
+screen quick_menu_panel(anim=True):
 
     zorder 100
 
@@ -483,65 +475,67 @@ screen quick_menu_panel():
     ## applied with "at" overrides the same properties set on the displayable.
     fixed:
 
-        at quick_menu_panel_anim
+        at (quick_menu_panel_anim if anim else quick_menu_panel_static)
 
         xsize 273
         ysize 436
 
-        ## The shipped PNG is a full 1280x720 export. The panel body sits at
-        ## x 1084..1279, y 99..490, with the collapse tab protruding to its
-        ## left at x 1039..1086, y 106..212. Crop it (x, y, w, h) to a 273x436
-        ## canvas: 32px of left padding, the 47px tab, then the 194px body,
-        ## right-aligned on the art's right edge. In these local coordinates
-        ## the body spans x 77..272, y 19..410 and the tab x 32..79, y 26..132.
-        add Transform("gui/button/menu/quick_menu.png", crop=(1007, 80, 273, 436))
+        ## The PNG is a full 1280x720 export with the panel on the right: body
+        ## at canvas x 1092..1278 / y 56..626, and the collapse tab protruding
+        ## to its left at x 1052..1092 / y 101..205. It is no longer cropped --
+        ## the whole canvas is right-aligned here, so canvas x maps straight to
+        ## screen x (the fixed's right edge is screen 1280) and, with the fixed
+        ## at ypos 0, canvas y maps straight to screen y. Local coordinates are
+        ## therefore canvas x - 1007 / canvas y: tab x 45..85 / y 101..205,
+        ## body x 85..271 / y 56..626.
+        add "gui/button/menu/quick_menu.png":
+            xalign 1.0
 
         ## Invisible hotspot over the tab baked into the art (local
-        ## x 32..79, y 26..132): this is the collapse control. background None
+        ## x 45..85, y 101..205): this is the collapse control. background None
         ## keeps it from drawing anything; there's no hover artwork, so the
         ## button pointer and the focus outline are the only feedback.
         button:
 
-            xpos 32
-            ypos 26
-            xysize (47, 107)
+            xpos 45
+            ypos 101
+            xysize (41, 105)
 
             background None
 
             action QuickMenuToggle()
 
-        ## Centred in the panel body: the body spans local x 77..272, so a
-        ## 170-wide column sits at xpos 77 + (196 - 170) / 2 = 89. This also
-        ## keeps the column clear of the tab hotspot on its left.
-        ##
-        ## ypos 40 leaves 21px between the column and the panel body's top edge
-        ## (local y 19), and ysize 355 runs it down to local y 395, short of
-        ## the body's bottom edge at 410.
-        ##
-        ## spacing 14 is deliberately loose enough to read as separate buttons
-        ## but tight enough to keep the column compact. The vbox is top-aligned,
-        ## so with 8 buttons at 14px gaps the column no longer reaches ysize
-        ## 355 and the panel has empty space below it -- lower ysize here won't
-        ## move anything, since a vbox lays its children out from the top.
-        vbox:
+        ## The button column is centred in the panel body. The body spans local
+        ## x 85..271 / y 56..626, so it is wrapped in a fixed of that size and
+        ## the vbox centres itself in it with xalign/yalign 0.5. Centring --
+        ## rather than the old top-aligned column -- keeps the buttons in the
+        ## middle of the taller panel instead of bunching at its top edge.
+        fixed:
 
-            style_prefix "quick"
+            xpos 85
+            ypos 56
+            xsize 186
+            ysize 570
 
-            xpos 89
-            ypos 40
-            xsize 170
-            ysize 355
+            vbox:
 
-            spacing 14
+                style_prefix "quick"
 
-            textbutton _("Back") action Rollback()
-            textbutton _("History") action ShowMenu('history')
-            textbutton _("Skip") action Skip() alternate Skip(fast=True, confirm=True)
-            textbutton _("Auto") action Preference("auto-forward", "toggle")
-            textbutton _("Save") action ShowMenu('save')
-            textbutton _("Q.Save") action QuickSave()
-            textbutton _("Q.Load") action QuickLoad()
-            textbutton _("Prefs") action ShowMenu('preferences')
+                xalign 0.5
+                yalign 0.5
+
+                xsize 170
+
+                spacing 24
+
+                textbutton _("Back") action Rollback()
+                textbutton _("History") action ShowMenu('history')
+                textbutton _("Skip") action Skip() alternate Skip(fast=True, confirm=True)
+                textbutton _("Auto") action Preference("auto-forward", "toggle")
+                textbutton _("Save") action ShowMenu('save')
+                textbutton _("Q.Save") action QuickSave()
+                textbutton _("Q.Load") action QuickLoad()
+                textbutton _("Prefs") action ShowMenu('preferences')
 
 
 ## This code ensures that the quick_menu screen is displayed in-game, whenever
@@ -554,15 +548,10 @@ screen quick_menu_panel():
 ## choice and nvl screens, so the tab doesn't cover a choice's options.
 default quick_menu = True
 
-## Whether the quick menu panel is expanded. Toggled by the side button.
-default quick_menu_open = False
-
-## Whether the side button is hovered. Swaps the tab between
-## quick_menu_tab_closed and quick_menu_tab_hover, so the lean moves the
-## button's box and hitbox along with its art. ATL has no "if" statement, so
-## this has to be a store variable the screen branches on rather than
-## something a transform can react to.
-default quick_menu_hover = False
+## Whether the panel is expanded and whether the side button is hovered live on
+## quick_menu_state (a NoRollback object), defined near the top of this section.
+## They are deliberately not plain store variables -- see the comment there --
+## so that rolling back doesn't collapse the panel.
 
 style quick_button is default
 style quick_button_text is button_text
@@ -597,21 +586,6 @@ screen navigation():
     if main_menu:
 
         ## The main menu uses painted button art instead of text buttons.
-        ##
-        ## The source art (gui/button/start1.png and friends) is a full
-        ## 1280x720 canvas with a single button painted at an absolute
-        ## position. The mm_*_idle and mm_*_hover images are those canvases
-        ## cropped to just the painted pill, positioned here with xpos/ypos.
-        ##
-        ## Idle and hover are cropped to the same rect on purpose. The hover art
-        ## is drawn slightly larger and shifted up-left, so cropping each state
-        ## to its own bounds would resize the button on hover and make it
-        ## jitter. Sharing one rect keeps the button a fixed size and preserves
-        ## the grow-from-the-top-left effect as painted.
-        ##
-        ## This is a child of the screen rather than of the navigation vbox, so
-        ## that xpos/ypos are relative to the screen origin the art was painted
-        ## against. The coordinates are absolute and assume gui.init(1280, 720).
         fixed:
 
             xpos 0
@@ -1280,12 +1254,11 @@ screen history():
 
     predict False
 
-    ## The art is a full 1280x720 canvas whose painted panel occupies
-    ## x 745..1279 for the full screen height, with a curved left edge. It's
-    ## added uncropped so the panel lands against the right edge and the game
-    ## stays visible to its left. This isn't a Frame because the panel's shape
-    ## is baked into the image, not tiled.
-    add "gui/button/menu/history.png"
+    ## The default game-menu box: a flat black dim (the game_menu.png overlay
+    ## is a uniform #000000cc with a cyan divider line near x 280 baked in).
+    ## Use a Solid with the same colour instead of the image so the divider
+    ## line -- which is meaningless on this standalone panel -- doesn't show.
+    add Solid("#000000cc")
 
     ## The log is drawn directly on the panel art: a backgroundless frame
     ## supplies the panel-width column and its 40px inner padding, and a
@@ -1420,14 +1393,14 @@ style history_name:
 
 style history_name_text:
     text_align 0.0
-    color "#686565"
+    color "#66c1e0"
     font "gui/font/baskervville.regular.ttf"
 
 style history_text:
     xsize gui.history_text_width
     text_align gui.history_text_xalign
     layout "tex"
-    color "#404040"
+    color "#f0f0f0"
     font "gui/font/baskervville.regular.ttf"
 
 ## The vertical scrollbar the viewport in screen history builds. style_prefix
@@ -1436,8 +1409,8 @@ style history_text:
 ## entirely when the log fits (unscrollable "hide").
 style history_vscrollbar:
     xsize 8
-    base_bar Solid("#003d5126")
-    thumb Solid("#02070899")
+    base_bar Solid("#ffffff1a")
+    thumb Solid("#ffffff66")
     unscrollable "hide"
 
 
@@ -1849,9 +1822,9 @@ screen quick_menu():
     ## the comments on screen quick_menu above. Only the closed tab lives here;
     ## the panel is a separate screen shown/hidden by QuickMenuToggle, and it
     ## carries its own baked-in collapse hotspot.
-    if quick_menu and not main_menu and not quick_menu_open:
+    if quick_menu and not main_menu and not quick_menu_state.open:
 
-        if quick_menu_hover:
+        if quick_menu_state.hover:
 
             imagebutton:
 
@@ -1862,7 +1835,7 @@ screen quick_menu():
 
                 action QuickMenuToggle()
 
-                unhovered SetVariable("quick_menu_hover", False)
+                unhovered SetField(quick_menu_state, "hover", False)
 
         else:
 
@@ -1875,62 +1848,68 @@ screen quick_menu():
 
                 action QuickMenuToggle()
 
-                hovered SetVariable("quick_menu_hover", True)
+                hovered SetField(quick_menu_state, "hover", True)
 
 
-## The panel art is the same size on touch, so the larger touch-sized buttons
-## go in a 2-column grid instead of a single stack.
-##
-## 3 rows, not 2: a fixed "grid 2 2" only has 4 cells, so the fifth button
-## (Save) was silently dropped and never appeared on touch layouts.
-screen quick_menu_panel():
+## The panel art is the same size on touch. The larger touch-sized buttons are
+## stacked in a single centred column (they no longer fit side by side now that
+## the panel body is only ~186px wide).
+screen quick_menu_panel(anim=True):
     variant "touch"
 
     zorder 100
 
     fixed:
 
-        at quick_menu_panel_anim
+        at (quick_menu_panel_anim if anim else quick_menu_panel_static)
 
         xsize 273
         ysize 436
 
-        ## Same crop as the desktop panel -- see the comments there.
-        add Transform("gui/button/menu/quick_menu.png", crop=(1007, 80, 273, 436))
+        ## Same uncropped, right-aligned panel art as the desktop panel -- see
+        ## the comments there.
+        add "gui/button/menu/quick_menu.png":
+            xalign 1.0
 
         ## Same collapse hotspot over the tab baked into the art as the desktop
         ## panel -- see the comments there.
         button:
 
-            xpos 32
-            ypos 26
-            xysize (47, 107)
+            xpos 45
+            ypos 101
+            xysize (41, 105)
 
             background None
 
             action QuickMenuToggle()
 
-        grid 2 3:
+        ## Centred in the panel body exactly like the desktop column -- see the
+        ## comments there. A single column rather than the old 2-column grid:
+        ## the body is only 186px wide, so two columns of the larger
+        ## touch-sized text could not fit inside it.
+        fixed:
 
-            style_prefix "quick"
+            xpos 85
+            ypos 56
+            xsize 186
+            ysize 570
 
-            ## Same vertical band and centring as the desktop column (xpos 89
-            ## centres 170px in the panel body's local x 77..272): local y 40
-            ## down to the body's bottom edge at 410. Touch buttons use the
-            ## larger gui.quick_button_text_size (30), so 20px gaps keep the
-            ## same visual separation the desktop's 14px gives at size 14.
-            xpos 89
-            ypos 40
-            xsize 170
-            ysize 355
+            vbox:
 
-            spacing 20
+                style_prefix "quick"
 
-            textbutton _("Back") action Rollback()
-            textbutton _("History") action ShowMenu('history')
-            textbutton _("Skip") action Skip() alternate Skip(fast=True, confirm=True)
-            textbutton _("Auto") action Preference("auto-forward", "toggle")
-            textbutton _("Save") action ShowMenu('save')
+                xalign 0.5
+                yalign 0.5
+
+                xsize 170
+
+                spacing 40
+
+                textbutton _("Back") action Rollback()
+                textbutton _("History") action ShowMenu('history')
+                textbutton _("Skip") action Skip() alternate Skip(fast=True, confirm=True)
+                textbutton _("Auto") action Preference("auto-forward", "toggle")
+                textbutton _("Save") action ShowMenu('save')
 
 
 style window:

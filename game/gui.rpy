@@ -35,7 +35,7 @@ define gui.idle_color = '#888888'
 
 ## The small color is used for small text, which needs to be brighter/darker to
 ## achieve the same effect.
-define gui.idle_small_color = '#aaaaaa'
+define gui.idle_small_color = '#0f4900'
 
 ## The color that is used for buttons and bars that are hovered.
 define gui.hover_color = '#66c1e0'
@@ -209,8 +209,8 @@ define gui.confirm_button_text_xalign = 0.5
 define gui.page_button_borders = Borders(15, 6, 15, 6)
 
 define gui.quick_button_borders = Borders(15, 6, 15, 0)
-define gui.quick_button_text_font = "gui/font/sunflower.otf"
-define gui.quick_button_text_size = 14
+define gui.quick_button_text_font = "gui/font/baskervville.regular.ttf"
+define gui.quick_button_text_size = 26
 define gui.quick_button_text_idle_color = gui.idle_small_color
 define gui.quick_button_text_selected_color = gui.accent_color
 

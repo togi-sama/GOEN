@@ -177,43 +177,80 @@ label shop_loop:
 
 screen shop():
 
+    ## Which place the cursor is over, as (label, x, y). Screen-local so it
+    ## never leaks into the store or participates in rollback; the label is
+    ## drawn on top of the hovered panel.
+    default shop_hovered = None
+
     add "images/BG/shop.png"
 
-    # Left door
-    imagebutton:
-        idle Solid("#00000000")
-        hover Solid("#ffffff22")
-        xpos 45
-        ypos 80
-        xsize 340
-        ysize 510
-        if not pi_scene_complete:
-            action Return("PI")
-        else:
-            action Return("wrong")
+    ## The three panels of shop.png are the clickable places. Regions are the
+    ## measured panel rects on the 1280x720 art: left x 18..410 / y 42..718,
+    ## middle x 458..815 / y 47..691, right x 846..1278 / y 0..718. The middle
+    ## rect is measured from its full teal fill -- its upper area is nearly the
+    ## same colour as the background, so a background-difference box would only
+    ## catch the lower steps. The idle layer is fully transparent; the subtle
+    ## white wash is the whole hover highlight.
+    ##
+    ## Gating is unchanged from the old hub: the office above can only be
+    ## entered while its scene is pending, and the mortuary below only opens
+    ## once that scene is done. The pharmacy has no scene yet, so it always
+    ## falls through to wrong_location.
 
-    # Middle door
+    # Left -- Mortuary
     imagebutton:
         idle Solid("#00000000")
-        hover Solid("#ffffff22")
-        xpos 515
-        ypos 75
-        xsize 305
-        ysize 520
-        action Return("wrong")
-
-    # Right door
-    imagebutton:
-        idle Solid("#00000000")
-        hover Solid("#ffffff22")
-        xpos 975
-        ypos 45
-        xsize 265
-        ysize 560
+        hover Solid("#ffffff12")
+        xpos 18
+        ypos 42
+        xsize 393
+        ysize 676
         if pi_scene_complete:
             action Return("mortuary")
         else:
             action Return("wrong")
+        hovered SetScreenVariable("shop_hovered", ("Mortuary", 214, 60))
+        unhovered SetScreenVariable("shop_hovered", None)
+
+    # Middle -- Office (uses the PI scene)
+    imagebutton:
+        idle Solid("#00000000")
+        hover Solid("#ffffff12")
+        xpos 458
+        ypos 47
+        xsize 358
+        ysize 645
+        if not pi_scene_complete:
+            action Return("PI")
+        else:
+            action Return("wrong")
+        hovered SetScreenVariable("shop_hovered", ("Office", 637, 52))
+        unhovered SetScreenVariable("shop_hovered", None)
+
+    # Right -- Pharmacy (no scene yet -> wrong_location)
+    imagebutton:
+        idle Solid("#00000000")
+        hover Solid("#ffffff12")
+        xpos 846
+        ypos 0
+        xsize 433
+        ysize 718
+        action Return("wrong")
+        hovered SetScreenVariable("shop_hovered", ("Pharmacy", 1062, 16))
+        unhovered SetScreenVariable("shop_hovered", None)
+
+    ## Hover label, drawn last so it sits on top of the hovered panel, centred
+    ## on that button's x and pinned just inside its top edge.
+    if shop_hovered:
+        text shop_hovered[0]:
+            font "gui/font/baskervville.regular.ttf"
+            size 40
+            color "#ffffff"
+            outlines [(2, "#00000080", 0, 0)]
+            xpos shop_hovered[1]
+            xanchor 0.5
+            ypos shop_hovered[2]
+            yanchor 0.0
 
 label wrong_location:
 
@@ -734,7 +771,6 @@ label mortuary:
     woman '"Then why are you counting?"'
     narrator "He looks down at his feet and can’t remember what step he’s on. The dark beneath him doesn’t answer either."
     
-    # Put CG
     yun '"Vertigo."'
     yun '"It is not the fear of falling, but the desire to. The pull…downward, to the depths."'
     yun '"A sweet resounding summons to renounce my waking self. In moments of weakness, I found I was ready to heed the call– to descend to a place where no one ever wakes."'
