@@ -184,18 +184,6 @@ screen shop():
 
     add "images/BG/shop.png"
 
-    ## The three panels of shop.png are the clickable places. Regions are the
-    ## measured panel rects on the 1280x720 art: left x 18..410 / y 42..718,
-    ## middle x 458..815 / y 47..691, right x 846..1278 / y 0..718. The middle
-    ## rect is measured from its full teal fill -- its upper area is nearly the
-    ## same colour as the background, so a background-difference box would only
-    ## catch the lower steps. The idle layer is fully transparent; the subtle
-    ## white wash is the whole hover highlight.
-    ##
-    ## Gating is unchanged from the old hub: the office above can only be
-    ## entered while its scene is pending, and the mortuary below only opens
-    ## once that scene is done. The pharmacy has no scene yet, so it always
-    ## falls through to wrong_location.
 
     # Left -- Mortuary
     imagebutton:
@@ -216,15 +204,15 @@ screen shop():
     imagebutton:
         idle Solid("#00000000")
         hover Solid("#ffffff12")
-        xpos 458
-        ypos 47
-        xsize 358
-        ysize 645
+        xpos 459
+        ypos 144
+        xsize 357
+        ysize 546
         if not pi_scene_complete:
             action Return("PI")
         else:
             action Return("wrong")
-        hovered SetScreenVariable("shop_hovered", ("Office", 637, 52))
+        hovered SetScreenVariable("shop_hovered", ("Office", 637, 160))
         unhovered SetScreenVariable("shop_hovered", None)
 
     # Right -- Pharmacy (no scene yet -> wrong_location)
