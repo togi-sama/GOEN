@@ -110,7 +110,6 @@ image splash_anim_1:
     xalign 0.5 yalign 0.5 alpha 0.0
     ease_quad 7.0 alpha 1.0 zoom 2.0
 
-default persistent.firstlaunch = False
 default persistent.seen_splash = False
 
 label splashscreen:
@@ -146,19 +145,15 @@ label splashscreen:
     label skip_splash:
  
         pass
-    
-    call screen content_warning
 
-    ## The first time the game is launched, players can set their accessibility settings.
-    if not persistent.firstlaunch:
-
-        call screen splash_settings
-
-        call screen preferences
-
-        ## This screen will not appear in subsequent launches of the game when
-        ## the following variable becomes true.
-        $ persistent.firstlaunch = True
+    ## The game now goes straight to the main menu. To restore the old
+    ## first-launch flow (content warning -> settings page -> preferences),
+    ## uncomment the block below.
+    # call screen content_warning
+    #
+    # call screen splash_settings
+    #
+    # call screen preferences
 
     return
 
@@ -921,16 +916,16 @@ label mortuary:
             yun '"Must be because you’re always with people who can’t complain."'
             show nestor smiling
             nestor '"One of the few advantages of my job."'
-            hide nestor
-            narrator "Nestor returns to the pharmacy first, a bell chimes from somewhere."
-            show yun neutral
-            narrator "Yun is alone now, drifting between dream and waking. The barrier is weaker here than it’s been all day."
-            narrator "He can’t help but whisper to himself. Reassurance mostly."
-            show yun soft
-            yun '"Still. Everything is still when the work is done.I’ll leave it here… at least for now.'
-            yun '"I carry the weight, but not the burden."'
-            hide yun
-            narrator "The stairs are shorter than they were coming back down. He doesn’t stop to think why."
+    hide nestor
+    narrator "Nestor returns to the pharmacy first, a bell chimes from somewhere."
+    show yun neutral
+    narrator "Yun is alone now, drifting between dream and waking. The barrier is weaker here than it’s been all day."
+    narrator "He can’t help but whisper to himself. Reassurance mostly."
+    show yun soft
+    yun '"Still. Everything is still when the work is done.I’ll leave it here… at least for now.'
+    yun '"I carry the weight, but not the burden."'
+    hide yun
+    narrator "The stairs are shorter than they were coming back down. He doesn’t stop to think why."
 
     ## Route resolution ###################################################
     ## Runs once, at the end of the last scene. The points themselves are

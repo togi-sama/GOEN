@@ -50,7 +50,7 @@ init -1:
     default persistent.sound_captions = False
     default persistent.image_captions = False
     default self.voicing = False
-    default persistent.screenshake = True
+    default persistent.screenshake = False
 
 
 # label splashscreen:

@@ -209,7 +209,8 @@ define gui.confirm_button_text_xalign = 0.5
 define gui.page_button_borders = Borders(15, 6, 15, 6)
 
 define gui.quick_button_borders = Borders(15, 6, 15, 0)
-define gui.quick_button_text_size = 10
+define gui.quick_button_text_font = "gui/font/sunflower.otf"
+define gui.quick_button_text_size = 14
 define gui.quick_button_text_idle_color = gui.idle_small_color
 define gui.quick_button_text_selected_color = gui.accent_color
 
@@ -371,17 +372,13 @@ define config.history_length = 250
 ## the cost of performance.
 define gui.history_height = None
 
-## The position, width, and alignment of the label giving the name of the
-## speaking character.
-define gui.history_name_xpos = 89
-define gui.history_name_ypos = 0
-define gui.history_name_width = 155
-define gui.history_name_xalign = 1.0
-
 ## The position, width, and alignment of the dialogue text.
-define gui.history_text_xpos = 103
-define gui.history_text_ypos = 13
-define gui.history_text_width = 740
+## The history log is drawn directly on history.png's right panel (screen
+## x 745..1280, 535px wide). The screen pads 40px on each side, giving a 455px
+## inner width; the subtle vertical scrollbar and its 4px spacing take 12px, so
+## the text wraps to 443px. Character names sit above the dialogue, so only the
+## dialogue needs a width.
+define gui.history_text_width = 443
 define gui.history_text_xalign = 0.0
 
 
@@ -479,7 +476,7 @@ init python:
         gui.pref_button_spacing = 15
 
         gui.history_height = 285
-        gui.history_text_width = 1035
+        gui.history_text_width = 443
 
         gui.quick_button_text_size = 30
 

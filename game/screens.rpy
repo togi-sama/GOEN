@@ -121,11 +121,17 @@ define centered = Character(None, window_background=None)
 screen say(who, what):
     style_prefix "say"
 
+    ## The quick menu is an overlay screen (see options.rpy), so this flag is
+    ## what shows/hides its tab. Set here so it reappears once a say-menu or
+    ## choice screen is dismissed.
+    $ quick_menu = True
+
     window:
 
         add Transform("gui/green.png", yzoom=0.4, yoffset=-140, alpha = 1.0)
 
-        ### IMPORTANT: The Transform() is holding the window background, and the alpha variable ties to our say window alpha
+        ## The window background is held by this Transform rather than by the
+        ## window's own style, so its alpha is set here.
 
         id "window"
 
@@ -138,8 +144,6 @@ screen say(who, what):
 
         text what id "what"
 
-    use quick_menu
-
     ## If there's a side image, display it above the text. Do not display on the
     ## phone variant - there's no room.
     ### Or, just comment out the if not and shift the side image back one tab
@@ -151,9 +155,6 @@ screen say(who, what):
 ## Make the namebox available for styling through the Character object.
 init python:
     config.character_id_prefixes.append('namebox')
-
-## Control the opacity of the textbox
-default persistent.say_window_alpha = 1.0
 
 style window is default
 style say_label is default
@@ -243,6 +244,10 @@ style input:
 screen choice(items):
     style_prefix "choice"
 
+    ## Hide the quick menu tab while choices are on screen, so it can't sit on
+    ## top of the options. screen say sets this back to True afterwards.
+    $ quick_menu = False
+
     vbox:
         for i in items:
             textbutton i.caption action i.action
@@ -271,18 +276,263 @@ style choice_button_text is default:
 ## The quick menu is displayed in-game to provide easy access to the out-of-game
 ## menus.
 
+## The quick menu is a tab at the top right that expands into a vertical panel
+## of buttons. Both are painted art from gui/button/menu. The panel art also
+## bakes in a second side-button tab at its top-left, which is what collapses
+## the panel again (see the hotspot in quick_menu_panel).
+##
+## Asset geometry (measured from the alpha masks, both are white art so they're
+## invisible against a white background):
+##
+##   side button.png  -- 81x121 canvas, art at x 37..80, y 12..114 (44x103).
+##                       A rounded tab with three horizontal lines, flush
+##                       against the canvas's RIGHT edge.
+##   quick_menu.png   -- shipped as a full 1280x720 canvas. The panel body is
+##                       at x 1084..1279, y 99..490 (196x392) with a second
+##                       side-button tab protruding to its left at
+##                       x 1039..1086, y 106..212. The panel screens crop it
+##                       (see quick_menu_panel) to a 273x436 canvas: 32px of
+##                       left padding, then the tab, then the body. In crop-
+##                       local coordinates the body spans x 77..272, y 19..410,
+##                       and the tab x 32..79, y 26..132.
+##
+## side button.png is added uncropped at xalign 1.0 and its left padding hangs
+## off-screen; quick_menu.png is cropped first and then right-aligned. When
+## right-aligned, quick_menu.png's art covers screen x 1039..1280, and side
+## button.png's art covers screen x 1236..1280.
+##
+## How the animation works
+## -----------------------
+## Ren'Py 8.5's ATL has no "if" statement, so a transform can't react to
+## quick_menu_open on its own. The panel is therefore a separate screen that
+## QuickMenuToggle shows and hides imperatively, and the slide lives in its
+## "on show"/"on hide" hooks -- the same mechanism screen notify uses for its
+## fade out. Ren'Py keeps the screen alive until the on-hide animation
+## finishes, which is what lets the panel slide away instead of blinking out.
+##
+## The closed tab (top right) lives in the overlay screen below and simply
+## isn't drawn while the panel is open, so it vanishes the instant the panel
+## opens rather than sliding along with it. Closing brings it straight back.
+## Collapsing is handled instead by an invisible hotspot over the tab baked
+## into the panel art's own top-left corner (see quick_menu_panel).
+##
+## The panel screen is shown/hidden imperatively by QuickMenuToggle rather than
+## with "use", because a "use"d child can't carry an on-show animation.
+##
+## The hover lean works differently, because it must move the button's hitbox as
+## well as its art (see quick_menu_tab_hover). Since ATL can't branch, the tab
+## screen picks between two transforms on a quick_menu_hover store variable and
+## restarts the interaction when it flips.
+
+init python:
+    class QuickMenuToggle(Action):
+        """
+        Opens or closes the quick menu panel, sliding it in and out.
+        """
+        def __call__(self):
+            store.quick_menu_open = not store.quick_menu_open
+
+            ## No zorder kwarg here on purpose: show_screen's parameter is
+            ## _zorder, and any keyword that doesn't start with an underscore
+            ## gets forwarded to the screen as a constructor argument -- which
+            ## this argument-less screen rejects. The screen sets its own
+            ## zorder in its body instead.
+            if store.quick_menu_open:
+                renpy.show_screen("quick_menu_panel")
+            else:
+
+                ## Clear the hover flag on close. While the panel is open the
+                ## closed-tab button doesn't exist, so it can't fire unhovered;
+                ## and when it's re-created on close, a button the cursor isn't
+                ## over never gains focus in the first place and so never fires
+                ## unhovered either. Left alone, a True from the click that
+                ## opened the panel would stick, and the closed tab would stay
+                ## drawn in its leaned branch forever.
+                store.quick_menu_hover = False
+
+                renpy.hide_screen("quick_menu_panel")
+
+            renpy.restart_interaction()
+
+
+## The always-visible tab in its closed, un-hovered position: art at
+## x 1258..1302, y 52..154.
+##
+## ypos 40 puts the tab flush below the top cinematic bar, which is
+## Solid("#000000") at y 0..40 (see screen cinematic_bars). The tab can't sit
+## over it because quick_menu sets zorder 100 while cinematic_bars has no
+## zorder and so draws underneath -- the tab would just cover the bar.
+##
+## xoffset 22 halves the tab off the right edge: the art is 44px wide, so only
+## its left 22px (screen x 1258..1280) is on screen and the other half hangs
+## off at x 1280..1302.
+transform quick_menu_tab_closed:
+    xalign 1.0
+    ypos 40
+    xoffset 22
+
+## The same tab while hovered: art at x 1236..1280, all 44px on screen.
+##
+## The lean is a transform on the *button*, not on a hover image, and that
+## matters. An earlier version used
+## "hover Transform('...', xoffset=-22)", which slid the picture 22px left
+## inside an 81x121 button box: the art moved but the box didn't, and
+## focus_mask (which resolves to the button's current render, so it follows the
+## image rather than the button) left art and hitbox disagreeing -- a
+## ghosted/doubled look. Moving the transform onto the button keeps the
+## picture, the box and the clickable region in lockstep, so the whole moved
+## button is clickable.
+##
+## xoffset 0 rather than -22 is deliberate: this is an absolute position, and
+## 0 is what puts the art's right edge on the screen edge at 1280.
+transform quick_menu_tab_hover:
+    xalign 1.0
+    ypos 40
+    xoffset 0
+
+## The panel. 273 is the cropped canvas width, so xoffset 273 parks it entirely
+## off screen to the right.
+##
+## ypos 36 top-aligns the panel art with the tab art: the panel art starts at
+## canvas y 16 (36 + 16 = 52) and the tab art starts at canvas y 12 (40 + 12 =
+## 52), so both begin on the same scanline.
+transform quick_menu_panel_anim:
+    xalign 1.0
+    ypos 36
+
+    xsize 273
+    ysize 436
+
+    on show:
+        xoffset 273
+        linear 0.20 xoffset 0
+
+    on hide:
+        xoffset 0
+        linear 0.20 xoffset 273
+
+
+## Overlay screen: the closed tab, plus the quick_menu/main_menu gating.
+##
+## Registered in config.overlay_screens (see options.rpy) rather than pulled in
+## with "use" from the say/nvl screens. The say screen is rebuilt for every
+## line of dialogue, which would restart the animations above and make the
+## panel slide in again on each line. As an overlay it persists.
 screen quick_menu():
 
     ## Ensure this appears on top of other screens.
     zorder 100
 
-    if quick_menu:
+    ## not main_menu keeps this off the main menu and off the Load/About/
+    ## Preferences screens, which are all "menu" screens reached via ShowMenu.
+    ## not quick_menu_open hides the closed tab entirely once the panel is
+    ## open, so pressing it makes it vanish rather than slide.
+    if quick_menu and not main_menu and not quick_menu_open:
 
-        hbox:
+        ## Two near-identical buttons rather than one button with a shifted
+        ## hover image. Only the "at" line differs; see
+        ## quick_menu_tab_hover for why the lean lives on the button.
+        ##
+        ## There's no "hover" displayable, so idle is the only image and the
+        ## position change *is* the hover feedback. focus_mask True then masks
+        ## against whichever button is currently drawn, so picture, box and
+        ## clickable region always agree.
+        ##
+        ## The transform is picked with an "if", which only re-evaluates when
+        ## an interaction restarts. SetVariable does that itself -- the data
+        ## actions call renpy.restart_interaction() in their __call__ -- so no
+        ## explicit restart is needed here.
+        ##
+        ## No padding on either: an imagebutton's natural hitbox is already its
+        ## full 81x121 canvas, which is what focus_mask wants. Adding
+        ## xpadding/ypadding would grow the button and offset the child image
+        ## inward, leaving a visible gap at the right screen edge.
+        if quick_menu_hover:
+
+            imagebutton:
+
+                idle "gui/button/menu/side button.png"
+                focus_mask True
+
+                at quick_menu_tab_hover
+
+                action QuickMenuToggle()
+
+                unhovered SetVariable("quick_menu_hover", False)
+
+        else:
+
+            imagebutton:
+
+                idle "gui/button/menu/side button.png"
+                focus_mask True
+
+                at quick_menu_tab_closed
+
+                action QuickMenuToggle()
+
+                hovered SetVariable("quick_menu_hover", True)
+
+
+## The expanded panel. Shown/hidden by QuickMenuToggle.
+screen quick_menu_panel():
+
+    zorder 100
+
+    ## xalign/ypos live in quick_menu_panel_anim, not here -- a transform
+    ## applied with "at" overrides the same properties set on the displayable.
+    fixed:
+
+        at quick_menu_panel_anim
+
+        xsize 273
+        ysize 436
+
+        ## The shipped PNG is a full 1280x720 export. The panel body sits at
+        ## x 1084..1279, y 99..490, with the collapse tab protruding to its
+        ## left at x 1039..1086, y 106..212. Crop it (x, y, w, h) to a 273x436
+        ## canvas: 32px of left padding, the 47px tab, then the 194px body,
+        ## right-aligned on the art's right edge. In these local coordinates
+        ## the body spans x 77..272, y 19..410 and the tab x 32..79, y 26..132.
+        add Transform("gui/button/menu/quick_menu.png", crop=(1007, 80, 273, 436))
+
+        ## Invisible hotspot over the tab baked into the art (local
+        ## x 32..79, y 26..132): this is the collapse control. background None
+        ## keeps it from drawing anything; there's no hover artwork, so the
+        ## button pointer and the focus outline are the only feedback.
+        button:
+
+            xpos 32
+            ypos 26
+            xysize (47, 107)
+
+            background None
+
+            action QuickMenuToggle()
+
+        ## Centred in the panel body: the body spans local x 77..272, so a
+        ## 170-wide column sits at xpos 77 + (196 - 170) / 2 = 89. This also
+        ## keeps the column clear of the tab hotspot on its left.
+        ##
+        ## ypos 40 leaves 21px between the column and the panel body's top edge
+        ## (local y 19), and ysize 355 runs it down to local y 395, short of
+        ## the body's bottom edge at 410.
+        ##
+        ## spacing 14 is deliberately loose enough to read as separate buttons
+        ## but tight enough to keep the column compact. The vbox is top-aligned,
+        ## so with 8 buttons at 14px gaps the column no longer reaches ysize
+        ## 355 and the panel has empty space below it -- lower ysize here won't
+        ## move anything, since a vbox lays its children out from the top.
+        vbox:
+
             style_prefix "quick"
 
-            xalign 0.5
-            yalign 1.0
+            xpos 89
+            ypos 40
+            xsize 170
+            ysize 355
+
+            spacing 14
 
             textbutton _("Back") action Rollback()
             textbutton _("History") action ShowMenu('history')
@@ -295,14 +545,24 @@ screen quick_menu():
 
 
 ## This code ensures that the quick_menu screen is displayed in-game, whenever
-## the player has not explicitly hidden the interface.
+## the player has not explicitly hidden the interface. Registered in
+## options.rpy alongside cinematic_bars.
 # init python:
 #     config.overlay_screens.append("quick_menu")
 
-## We'll set this to False by default so we can show and hide the quick_menu during
-## choices and such
-
+## quick_menu controls whether the tab is shown at all. It's set by the say,
+## choice and nvl screens, so the tab doesn't cover a choice's options.
 default quick_menu = True
+
+## Whether the quick menu panel is expanded. Toggled by the side button.
+default quick_menu_open = False
+
+## Whether the side button is hovered. Swaps the tab between
+## quick_menu_tab_closed and quick_menu_tab_hover, so the lean moves the
+## button's box and hitbox along with its art. ATL has no "if" statement, so
+## this has to be a store variable the screen branches on rather than
+## something a transform can react to.
+default quick_menu_hover = False
 
 style quick_button is default
 style quick_button_text is button_text
@@ -310,8 +570,17 @@ style quick_button_text is button_text
 style quick_button:
     properties gui.button_properties("quick_button")
 
+    ## These buttons are stacked vertically inside a painted panel, so the
+    ## stock horizontal-strip background would tile across it. Drop the
+    ## background and give each button the panel's inner width instead.
+    background None
+    xfill False
+    xsize 170
+
 style quick_button_text:
     properties gui.button_text_properties("quick_button")
+    text_align 0.5
+    xalign 0.5
 
 
 ################################################################################
@@ -325,49 +594,119 @@ style quick_button_text:
 
 screen navigation():
 
-    vbox:
-        style_prefix "navigation"
+    if main_menu:
 
-        xpos gui.navigation_xpos
-        yalign 0.5
+        ## The main menu uses painted button art instead of text buttons.
+        ##
+        ## The source art (gui/button/start1.png and friends) is a full
+        ## 1280x720 canvas with a single button painted at an absolute
+        ## position. The mm_*_idle and mm_*_hover images are those canvases
+        ## cropped to just the painted pill, positioned here with xpos/ypos.
+        ##
+        ## Idle and hover are cropped to the same rect on purpose. The hover art
+        ## is drawn slightly larger and shifted up-left, so cropping each state
+        ## to its own bounds would resize the button on hover and make it
+        ## jitter. Sharing one rect keeps the button a fixed size and preserves
+        ## the grow-from-the-top-left effect as painted.
+        ##
+        ## This is a child of the screen rather than of the navigation vbox, so
+        ## that xpos/ypos are relative to the screen origin the art was painted
+        ## against. The coordinates are absolute and assume gui.init(1280, 720).
+        fixed:
 
-        spacing gui.navigation_spacing
+            xpos 0
+            ypos 0
 
-        if main_menu:
+            xsize 1280
+            ysize 720
 
-            textbutton _("Start") action Start()
+            ## focus_mask makes the transparent area around each rounded pill
+            ## non-clickable, so the rectangular crop box does not create stray
+            ## hot spots at the corners. It is set here rather than through a
+            ## style: style_prefix combines with each child's own default style
+            ## name, so a prefix of "mm_image_button" would resolve to the
+            ## undefined "mm_image_button_image_button" and silently do nothing.
+            ##
+            ## Order matches the painted column, top to bottom.
 
-        else:
+            imagebutton:
+                idle "gui/button/mm_start_idle.png"
+                hover "gui/button/mm_start_hover.png"
+                focus_mask True
+                xpos 60
+                ypos 328
+                action Start()
+
+            imagebutton:
+                idle "gui/button/mm_load_idle.png"
+                hover "gui/button/mm_load_hover.png"
+                focus_mask True
+                xpos 77
+                ypos 420
+                action ShowMenu("load")
+
+            imagebutton:
+                idle "gui/button/mm_about_idle.png"
+                hover "gui/button/mm_about_hover.png"
+                focus_mask True
+                xpos 87
+                ypos 496
+                action ShowMenu("about")
+
+            imagebutton:
+                idle "gui/button/mm_options_idle.png"
+                hover "gui/button/mm_options_hover.png"
+                focus_mask True
+                xpos 89
+                ypos 557
+                action ShowMenu("preferences")
+
+            ## The quit button is banned on iOS and unnecessary on Android and
+            ## Web. The art has no mobile variant.
+            if renpy.variant("pc"):
+
+                imagebutton:
+                    idle "gui/button/mm_quit_idle.png"
+                    hover "gui/button/mm_quit_hover.png"
+                    focus_mask True
+                    xpos 79
+                    ypos 621
+                    action Quit(confirm=not main_menu)
+
+    else:
+
+        vbox:
+            style_prefix "navigation"
+
+            xpos gui.navigation_xpos
+            yalign 0.5
+
+            spacing gui.navigation_spacing
 
             ## We're using the Separated History Screen, so we'll comment this out
             # textbutton _("History") action ShowMenu("history")
 
             textbutton _("Save") action ShowMenu("save")
 
-        textbutton _("Load") action ShowMenu("load")
+            textbutton _("Load") action ShowMenu("load")
 
-        textbutton _("Preferences") action ShowMenu("preferences")
+            textbutton _("Preferences") action ShowMenu("preferences")
 
-        if _in_replay:
+            if _in_replay:
 
-            textbutton _("End Replay") action EndReplay(confirm=True)
+                textbutton _("End Replay") action EndReplay(confirm=True)
 
-        elif not main_menu:
+            else:
 
-            textbutton _("Main Menu") action MainMenu()
+                textbutton _("Main Menu") action MainMenu()
 
-        textbutton _("About") action ShowMenu("about")
+            textbutton _("About") action ShowMenu("about")
 
-        if main_menu:
+            if renpy.variant("pc"):
 
-            textbutton _("Extras") action ShowMenu("bobcachievements") alt "Extras"
-            textbutton _("Image Tools") action ShowMenu("image_tools")
-
-        if renpy.variant("pc"):
-
-            ## The quit button is banned on iOS and unnecessary on Android and
-            ## Web.
-            textbutton _("Quit") action Quit(confirm=not main_menu)
+                ## The quit button is banned on iOS and unnecessary on Android
+                ## and Web.
+                textbutton _("Quit") action Quit(confirm=not main_menu)
 
 
 style navigation_button is gui_button
@@ -394,11 +733,23 @@ screen main_menu():
 
     add gui.main_menu_background
 
-    ## This empty frame darkens the main menu.
-    ## Don't want that sidebar on the left? Change the image associated
-    ## with it or comment this out.
-    frame:
-        style "main_menu_frame"
+    ## Decorative border frame. Screen children are drawn in source order with
+    ## later ones on top, so this composites over the background art, and the
+    ## navigation screen below stays on top of it.
+    ##
+    ## Note that the left panel of this frame is opaque for the full screen
+    ## height (roughly x 0..400, bulging with y), so it covers that part of the
+    ## background art, and the button column sits on solid red.
+    add "gui/button/menu/menu frame.png"
+
+    ## Replaces the [config.name] title text that used to sit in the bottom
+    ## right. logo.png is a full 1280x720 canvas with the logo painted at the
+    ## top left (x 38..367, y 34..294), so it is added uncropped and lands where
+    ## it was painted rather than in the corner.
+    ##
+    ## It goes after the frame because the frame is opaque in that region, so
+    ## adding it first would hide the logo.
+    add "gui/button/menu/logo.png"
 
     ## The use statement includes another screen inside this one. The actual
     ## contents of the main menu are in the navigation screen.
@@ -406,47 +757,14 @@ screen main_menu():
     ## control placement better.
     use navigation
 
-    ## Note: I've found that turning this off in options.rpy actually
-    ## doesn't do anything. Comment it out if you don't want this.
-    if gui.show_name:
-
-        vbox:
-            style "main_menu_vbox"
-
-            text "[config.name!t]":
-                style "main_menu_title"
-
-            text "[config.version]":
-                style "main_menu_version"
-
 
 style main_menu_frame is empty
-style main_menu_vbox is vbox
-style main_menu_text is gui_text
-style main_menu_title is main_menu_text
-style main_menu_version is main_menu_text
 
 style main_menu_frame:
     xsize 280
     yfill True
 
     background "gui/overlay/main_menu.png"
-
-style main_menu_vbox:
-    xalign 1.0
-    xoffset -30
-    xmaximum 800
-    yalign 1.0
-    yoffset -30
-
-style main_menu_text:
-    properties gui.text_properties("main_menu", accent=True)
-
-style main_menu_title:
-    properties gui.text_properties("title")
-
-style main_menu_version:
-    properties gui.text_properties("version")
 
 
 ## Game Menu screen ############################################################
@@ -466,6 +784,12 @@ screen game_menu(title, scroll=None, yinitial=0.0):
         add gui.main_menu_background
     else:
         add gui.game_menu_background
+
+    ## Semi-transparent green wash so the Load/About/Preferences content reads
+    ## clearly on top of the main menu art. Drawn after the background but
+    ## before the frames, so the navigation button column below stays crisp.
+    if main_menu:
+        add Solid("#0b3d0b80")
 
     frame:
         style "game_menu_outer_frame"
@@ -514,12 +838,16 @@ screen game_menu(title, scroll=None, yinitial=0.0):
 
     use navigation
 
-    textbutton _("Return"):
-        style "return_button"
+    ## Only shown for menus opened from inside the game. On the main menu's
+    ## Load/About/Preferences screens this is hidden -- ESC already returns to
+    ## the main menu via the key "game_menu" action below.
+    if not main_menu:
+        textbutton _("Return"):
+            style "return_button"
 
-        action Return()
+            action Return()
 
-    label title
+
 
     if main_menu:
         key "game_menu" action ShowMenu("main_menu")
@@ -539,10 +867,25 @@ style return_button is navigation_button
 style return_button_text is navigation_button_text
 
 style game_menu_outer_frame:
-    bottom_padding 45
-    top_padding 180
+    ## These paddings set the height of the area the game menu content is laid
+    ## out in (Load/Save slots, About, Preferences, History). They were reduced
+    ## from 45/180 because the 3x2 slot grid is ~422px tall and, in the old
+    ## 485px-tall area, the grid only cleared the page-name field and the page
+    ## nav row by ~1px. 50px more room now gives ~20px above and below the
+    ## grid. The grid re-centers itself via yalign, so no change is needed in
+    ## screen file_slots. Note this shifts the About/Preferences content up by
+    ## ~17px; the "Load"/"About" title on the left is positioned by
+    ## game_menu_label and does not move.
+    bottom_padding 30
+    top_padding 145
 
-    background "gui/overlay/game_menu.png"
+    ## This used to dim the whole game menu screen. It's now just transparent,
+    ## so the main menu art shows through the Load/Preferences/About screens.
+    ## Don't delete the frame in screen game_menu -- this style also supplies
+    ## the top/bottom padding those screens are laid out with. The green wash
+    ## over the main menu art is added in screen game_menu instead, so leave
+    ## this background commented out unless you want a second overlay.
+    # background "gui/overlay/game_menu.png"
 
 style game_menu_navigation_frame:
     xsize 280
@@ -799,50 +1142,9 @@ screen preferences():
                     textbutton _("After Choices") action Preference("after choices", "toggle")
                     textbutton _("Transitions") action InvertSelected(Preference("transitions", "toggle"))
 
-                ## Custom Preferences here
-
-                vbox:
-                    style_prefix "check"
-                    label _("Toggles")
-                    textbutton _("Image Descriptions") action ToggleVariable("persistent.image_captions") alt "Toggle Image Descriptions"
-                    textbutton _("Audio Titles") action ToggleVariable("persistent.sound_captions") alt "Toggle Sound Captions"
-                    if renpy.variant("pc"):
-                        ## Self-voicing does not work on smartphone devices, so this
-                        ## option only shows if the user is playing on a PC.
-                        textbutton _("Self-Voicing") action Preference("self voicing", "toggle") alt "Toggle Self-Voicing"
-                    textbutton "Screenshake" action ToggleField(persistent,"screenshake",true_value=True,false_value=False) alt "Toggle Screen Shake"
-
-                vbox:
-                    style_prefix "radio"
-                    label _("Typeface")
-                    textbutton _("DejaVu Sans") action [gui.SetPreference("font", "DejaVuSans.ttf"), gui.SetPreference("size", 31), SetVariable("persistent.typeface", "DejaVuSans")] alt "Change font to DejaVu Sans"
-                    textbutton _("{font=gui/font/Atkinson-Hyperlegible-Regular-102.ttf}{size=40}Hyperlegible{/size}{/font}") action [gui.SetPreference("font", "gui/font/Atkinson-Hyperlegible-Regular-102.ttf"), gui.SetPreference("size", 32), SetVariable("persistent.typeface", "Hyperlegible")] alt "Change font to HyperLegible"
-
-                vbox:
-                    style_prefix "radio"
-                    label _("Font Size")
-                    if persistent.typeface == "DejaVuSans":
-                        textbutton _("Large") action gui.SetPreference("size", 27) alt "Change to Large Size Text"
-                        textbutton _("Regular") action gui.SetPreference("size", 21) alt "Change to Regular Size Text"
-                    elif persistent.typeface == "Hyperlegible":
-                        textbutton _("Large") action gui.SetPreference("size", 25) alt "Change to Large Size Text"
-                        textbutton _("Regular") action gui.SetPreference("size", 21) alt "Change to Regular Size Text"
-
-                vbox:
-                    style_prefix "radio"
-                    label _("Text Color")
-                    textbutton _("White") action gui.SetPreference("color", "#ffffff") alt "Change text color to white" 
-                    textbutton _("Cream") action gui.SetPreference("color", "#FFFDD0") alt "Change text color to cream" 
-
-                vbox:
-                    style_prefix "radio"
-                    label _("Line Spacing")
-                    textbutton _("Taller") action gui.SetPreference("dialogue_spacing", 4) alt "Change the height of the space between lines of dialogue to be taller"
-                    textbutton _("Regular") action gui.SetPreference("dialogue_spacing", 2) alt "Change the height of the space between lines of dialogue to the regular height"
-
-
-                ## Additional vboxes of type "radio_pref" or "check_pref" can be
-                ## added here, to add additional creator-defined preferences.
+                ## Custom Preferences here. Additional vboxes of type
+                ## "radio" or "check" can be added to add creator-defined
+                ## preferences.
 
             null height (4 * gui.pref_spacing)
 
@@ -859,10 +1161,6 @@ screen preferences():
                     label _("Auto-Forward Time")
 
                     bar value Preference("auto-forward time")
-
-                    label _("Textbox Opacity")
-
-                    bar value FieldValue(persistent, 'say_window_alpha', 1.0, max_is_zero=False, offset=0, step=.2) xmaximum 525 style "slider" alt "Textbox Opacity"
 
 
                 vbox:
@@ -882,16 +1180,6 @@ screen preferences():
 
                             if config.sample_sound:
                                 textbutton _("Test") action Play("sound", config.sample_sound)
-
-
-                    if config.has_voice:
-                        label _("Voice Volume")
-
-                        hbox:
-                            bar value Preference("voice volume")
-
-                            if config.sample_voice:
-                                textbutton _("Test") action Play("voice", config.sample_voice)
 
                     if config.has_music or config.has_sound or config.has_voice:
                         null height gui.pref_spacing
@@ -980,16 +1268,11 @@ style slider_vbox:
 ##
 ## https://www.renpy.org/doc/html/history.html
 
-## Note: This is my custom version of the History screen that is not attached
-## to the game menu, and will appear in place of the textbox when called up.
-## Margins and Padding may need to be adjusted accordingly.
-
-## TODO: If you are not basing your project off this template, please do the following:
-## At "style vscrollbar", add the line below:
-## unscrollable "hide"
-## Copy over the styles for this history screen
-## In "gui.rpy", change "gui.history_height" to "None"
-## Use CTRL + F to find the terms as you need to.
+## Note: This is a custom version of the History screen that is not attached
+## to the game menu. It draws the log directly onto history.png with no frame,
+## title, or scrollbar; mousewheel and drag scroll it. The panel geometry is
+## described on the screen below, and gui.history_text_width in gui.rpy sets
+## the wrapped text column.
 
 screen history():
 
@@ -997,67 +1280,71 @@ screen history():
 
     predict False
 
+    ## The art is a full 1280x720 canvas whose painted panel occupies
+    ## x 745..1279 for the full screen height, with a curved left edge. It's
+    ## added uncropped so the panel lands against the right edge and the game
+    ## stays visible to its left. This isn't a Frame because the panel's shape
+    ## is baked into the image, not tiled.
+    add "gui/button/menu/history.png"
+
+    ## The log is drawn directly on the panel art: a backgroundless frame
+    ## supplies the panel-width column and its 40px inner padding, and a
+    ## viewport scrolls inside it. The vertical scrollbar is what builds the
+    ## `side` layout that bounds the viewport, so it must stay even though it's
+    ## styled to be subtle (see style history_vscrollbar). No frame background
+    ## or title.
     frame:
 
         style_prefix "history"
 
-        ## If you have a custom image you want to use for the screen, you can set it as
-        ## a Frame below.
-        # background Frame(["gui/frame.png"], gui.history_frame_borders, tile=True)
+        background None
 
-        ## Style this as needed in the style definitions
-        label _("History")
+        xalign 1.0
+        xsize 535
+        xmargin 0
 
-        ## Using margin properties will allow the screen to automatically adjust should
-        ## you choose to use a different resolution than 1080p, and will always be centered. 
-        ## You can also resize the screen using "xmaximum", "ymaximum", or "maximum(x,y)"
-        ## if desired, but you will need to use "align(x,y)" to manually position it.
+        ysize 640
+        ypos 40
 
-        ## xmargin essentially combines the left_margin and right_margin properties
-        ## and sets them to the same value
-        xmargin 200
+        ## xpadding sets left and right padding to the same value (the panel's
+        ## 455px inner width is 535 - 2*40; the scrollbar and its 4px spacing
+        ## take 12px of that, so the text column is 443 -- see
+        ## gui.history_text_width).
+        xpadding 40
 
-        ## ymargin essentially combines the top_margin and bottom_margin properties
-        ## and sets them to the same value
-        ymargin 50
+        ## ypadding sets top and bottom padding to the same value.
+        ypadding 40
 
-        ## xpadding essentially combines the left_padding and right_padding properties
-        ## and sets them to the same value
-        xpadding 50
+        viewport:
 
-        ## ypadding essentially combines the top_padding and bottom_padding properties
-        ## and sets them to the same value
-        ypadding 150
-
-        vpgrid:
-
-            cols 1
             yinitial 1.0
 
-            draggable True
-            mousewheel True
             scrollbars "vertical"
+            mousewheel True
+            draggable True
+            pagekeys True
+            arrowkeys True
+
+            ## Fill the frame's inner height so the viewport is bounded and
+            ## scrolls, instead of growing to fit the whole log.
+            side_yfill True
+            side_spacing 4
 
             vbox:
 
                 for h in _history_list:
 
-                    window:
+                    ## Each entry stacks the character name on its own line
+                    ## above the dialogue, so both span the full text column.
+                    vbox:
 
-                        ## This lays things out properly if history_height is None.
-                        has fixed:
-                            yfit True
+                        spacing 4
 
                         if h.who:
 
                             label h.who:
                                 style "history_name"
                                 substitute False
-
-                                ## Take the color of the who text from the Character, if
-                                ## set.
-                                if "color" in h.who_args:
-                                    text_color h.who_args["color"]
 
                         $ what = renpy.filter_text_tags(h.what, allow=gui.history_allow_tags)
                         text what:
@@ -1074,10 +1361,8 @@ screen history():
                     ## from getting cut off. Adjust when replacing the
                     ## default fonts.
 
-        textbutton "Return":
-            style "history_return_button"
-            action Return()
-            alt _("Return") 
+        ## No Return button -- history.png is a right-hand panel, and ESC (or
+        ## the quick menu's History button) closes this screen.
 
 ### The old version of the History screen, just for reference.
 # screen history():
@@ -1123,52 +1408,37 @@ screen history():
 define gui.history_allow_tags = { "alt", "noalt" }
 
 
-style history_window is empty
-
+## History styles. Each entry is a vbox (see screen history): the character
+## name sits on its own line above the dialogue, both left-aligned in the
+## panel's text column. Only the dialogue needs a width, since it wraps.
 style history_name is gui_label
 style history_name_text is gui_label_text
 style history_text is gui_text
 
-style history_text is gui_text
-
-style history_label is gui_label
-style history_label_text is gui_label_text
-
-style history_window:
-    xfill True
-    ysize gui.history_height
-
 style history_name:
-    xpos gui.history_name_xpos
-    xanchor gui.history_name_xalign
-    ypos gui.history_name_ypos
-    xsize gui.history_name_width
+    xalign 0.0
 
 style history_name_text:
-    min_width gui.history_name_width
-    text_align gui.history_name_xalign
+    text_align 0.0
+    color "#686565"
+    font "gui/font/baskervville.regular.ttf"
 
 style history_text:
-    xpos gui.history_text_xpos
-    ypos gui.history_text_ypos
-    xanchor gui.history_text_xalign
     xsize gui.history_text_width
-    min_width gui.history_text_width
     text_align gui.history_text_xalign
-    layout ("subtitle" if gui.history_text_xalign else "tex")
+    layout "tex"
+    color "#404040"
+    font "gui/font/baskervville.regular.ttf"
 
-style history_label:
-    xfill True
-    top_margin -100
-
-style history_label_text:
-    xalign 0.5
-    ## Note: When altering the size of the label, you may need to increase the
-    ## ypadding of the Frame, or separate it again into top_padding and bottom_padding
-
-style history_return_button:
-    align(1.0,1.0)
-    yoffset 100
+## The vertical scrollbar the viewport in screen history builds. style_prefix
+## "history" on the frame names it history_vscrollbar. Kept deliberately subtle
+## -- a slim, translucent thumb over a near-invisible track -- and hidden
+## entirely when the log fits (unscrollable "hide").
+style history_vscrollbar:
+    xsize 8
+    base_bar Solid("#003d5126")
+    thumb Solid("#02070899")
+    unscrollable "hide"
 
 
 ## Help screen #################################################################
@@ -1349,6 +1619,10 @@ style notify_text:
 
 screen nvl(dialogue, items=None):
 
+    ## NVL shows dialogue and its menu on the same screen, so the quick menu
+    ## tab is only shown when there's no menu (items is None) to sit over.
+    $ quick_menu = (items is None)
+
     window:
         style "nvl_window"
 
@@ -1377,8 +1651,6 @@ screen nvl(dialogue, items=None):
                 style "nvl_button"
 
     add SideImage() xalign 0.0 yalign 1.0
-
-    use quick_menu
 
 
 screen nvl_dialogue(dialogue):
@@ -1565,24 +1837,100 @@ style pref_vbox:
     xsize 675
 
 ## Since a mouse may not be present, we replace the quick menu with a version
-## that uses fewer and bigger buttons that are easier to touch.
+## that uses the same side-button tab and panel, but with fewer and bigger
+## buttons that are easier to touch. The panel art is the same size, so the
+## larger buttons are laid out in a two-column grid instead of a single stack.
 screen quick_menu():
     variant "touch"
 
     zorder 100
 
-    if quick_menu:
+    ## Same guard, transform and hover branching as the desktop version -- see
+    ## the comments on screen quick_menu above. Only the closed tab lives here;
+    ## the panel is a separate screen shown/hidden by QuickMenuToggle, and it
+    ## carries its own baked-in collapse hotspot.
+    if quick_menu and not main_menu and not quick_menu_open:
 
-        hbox:
+        if quick_menu_hover:
+
+            imagebutton:
+
+                idle "gui/button/menu/side button.png"
+                focus_mask True
+
+                at quick_menu_tab_hover
+
+                action QuickMenuToggle()
+
+                unhovered SetVariable("quick_menu_hover", False)
+
+        else:
+
+            imagebutton:
+
+                idle "gui/button/menu/side button.png"
+                focus_mask True
+
+                at quick_menu_tab_closed
+
+                action QuickMenuToggle()
+
+                hovered SetVariable("quick_menu_hover", True)
+
+
+## The panel art is the same size on touch, so the larger touch-sized buttons
+## go in a 2-column grid instead of a single stack.
+##
+## 3 rows, not 2: a fixed "grid 2 2" only has 4 cells, so the fifth button
+## (Save) was silently dropped and never appeared on touch layouts.
+screen quick_menu_panel():
+    variant "touch"
+
+    zorder 100
+
+    fixed:
+
+        at quick_menu_panel_anim
+
+        xsize 273
+        ysize 436
+
+        ## Same crop as the desktop panel -- see the comments there.
+        add Transform("gui/button/menu/quick_menu.png", crop=(1007, 80, 273, 436))
+
+        ## Same collapse hotspot over the tab baked into the art as the desktop
+        ## panel -- see the comments there.
+        button:
+
+            xpos 32
+            ypos 26
+            xysize (47, 107)
+
+            background None
+
+            action QuickMenuToggle()
+
+        grid 2 3:
+
             style_prefix "quick"
 
-            xalign 0.5
-            yalign 1.0
+            ## Same vertical band and centring as the desktop column (xpos 89
+            ## centres 170px in the panel body's local x 77..272): local y 40
+            ## down to the body's bottom edge at 410. Touch buttons use the
+            ## larger gui.quick_button_text_size (30), so 20px gaps keep the
+            ## same visual separation the desktop's 14px gives at size 14.
+            xpos 89
+            ypos 40
+            xsize 170
+            ysize 355
+
+            spacing 20
 
             textbutton _("Back") action Rollback()
+            textbutton _("History") action ShowMenu('history')
             textbutton _("Skip") action Skip() alternate Skip(fast=True, confirm=True)
             textbutton _("Auto") action Preference("auto-forward", "toggle")
-            textbutton _("Menu") action ShowMenu()
+            textbutton _("Save") action ShowMenu('save')
 
 
 style window:
@@ -1607,7 +1955,7 @@ style main_menu_frame:
 
 style game_menu_outer_frame:
     variant "small"
-    background "gui/phone/overlay/game_menu.png"
+    # background "gui/phone/overlay/game_menu.png"
 
 style game_menu_navigation_frame:
     variant "small"

@@ -251,3 +251,10 @@ init python:
 
 init python:
     config.overlay_screens.append("cinematic_bars")
+
+    ## The quick menu is an overlay screen rather than being pulled in with
+    ## "use" from the say/nvl screens, because the say screen is rebuilt for
+    ## every line of dialogue. If it lived inside say, its tab/panel animation
+    ## transforms would restart on each line and the panel would slide in
+    ## again every time the player advanced the text.
+    config.overlay_screens.append("quick_menu")
