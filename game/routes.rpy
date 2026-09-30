@@ -189,7 +189,7 @@ init python:
 ## full without inherited scaffolding getting in the way.
 label ending_prologue(ending_id):
 
-    scene black with fade
+    scene black with slowfade
     stop music fadeout 1.0
 
     ## Granting through the python entry point rather than the `achieve`
@@ -219,6 +219,7 @@ label ending_a:
     narrator "Yun’s hands are steady. His eyes though, are somewhere Nestor can’t follow him to."
     narrator "He chased the thread until he caught it. He wasn’t taught what to do when it caught him back."
 
+    scene black with slowfade
 
     return
 
@@ -227,6 +228,9 @@ label ending_a:
 label ending_b:
 
     call ending_prologue("b")
+
+    scene true_end at ending_drift with slowdissolve
+
 
     narrator "Yun doesn’t remember sleeping. It’s still light outside, he’s back at the counter."
     narrator "The day’s exhaustion must have caught up with him. Hours of navigating his dreams carefully was starting to show."
@@ -241,6 +245,7 @@ label ending_b:
     narrator "Behind the counter, seeing him wake, Nestor turns back to his work. The day continues."
     narrator "And Yun stays awake."
 
+    scene black with slowfade
 
     return
 
@@ -259,5 +264,7 @@ label ending_c:
     narrator "The voice drowns out. Yun will forget what was said come morning. Not a fault of memory, it’s just how an ordinary day costs him, nothing- and gives him, also nothing."
     narrator "He’ll wake and the pharmacy will be there unchanged, exactly as he left it. His hands will reach for the first jar and work will begin."
     narrator "Another ordinary day. He really was just tired."
+
+    scene black with slowfade
 
     return

@@ -84,6 +84,12 @@ define config.has_voice = True
 ## Each variable should be set to a transition, or None to indicate that no
 ## transition should be used.
 
+## Slow, cinematic transitions used by the endings. Defined here so
+## config.end_game_transition below can reference slowdissolve.
+
+define slowfade = Fade(2.5, 1.0, 3.0)
+define slowdissolve = Dissolve(3.5)
+
 ## Entering or exiting the game menu.
 
 define config.enter_transition = dissolve
@@ -102,7 +108,7 @@ define config.after_load_transition = dissolve
 
 ## Used when entering the main menu after the game has ended.
 
-define config.end_game_transition = dissolve
+define config.end_game_transition = slowdissolve
 
 
 ## A variable to set the transition used when the game starts does not exist.
@@ -145,7 +151,7 @@ default preferences.text_cps = 45
 ## The default auto-forward delay. Larger numbers lead to longer waits, with 0
 ## to 30 being the valid range.
 
-default preferences.afm_time = 15
+default preferences.afm_time = 5
 
 
 ## The default volume for the audio channels.

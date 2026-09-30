@@ -1,15 +1,32 @@
 init python:
     herb_orders = [
-        {"customer": "Mara", "herbs": ["Moonmint", "Frost Sage"]},
-        {"customer": "Iven", "herbs": ["Sunroot", "Red Clover"]},
-        {"customer": "Lio", "herbs": ["Star Anise", "Moonmint"]},
-        {"customer": "Sera", "herbs": ["Frost Sage", "Sunroot"]},
-        {"customer": "Tomas", "herbs": ["Red Clover", "Star Anise"], "crossed_out_name": "Nyima"},
+        {"customer": "Mara", "herbs": ["Wormwood", "Ginseng"]},
+        {"customer": "Iven", "herbs": ["Chrysanthemum", "Red Sage"]},
+        {"customer": "Lio", "herbs": ["Turmeric", "Chrysanthemum"]},
+        {"customer": "Sera", "herbs": ["Ginseng", "Wormwood"]},
+        {"customer": "Tomas", "herbs": ["Turmeric", "Red Sage"], "crossed_out_name": "Nyima"},
     ]
-    herb_supply = ["Moonmint", "Sunroot", "Star Anise", "Frost Sage", "Red Clover"]
+    herb_supply = ["Wormwood", "Red Sage", "Turmeric", "Chrysanthemum", "Ginseng"]
+
+    # Hitbox rectangles (x, y, w, h) for the herb supply art drawn in
+    # images/minigame/minigame.png, left to right. The dragged name only
+    # appears while one of these is being dragged.
+    herb_slots = [
+        (204, 16, 128, 152),   # Wormwood - green jar
+        (392, 22, 128, 150),   # Red Sage - red jar
+        (580, 104, 116, 58),   # Turmeric - yellow bowl
+        (754, 108, 118, 58),   # Chrysanthemum - red bowl
+        (910, 14, 130, 150),   # Ginseng - pale jar
+    ]
 
     # Extra names shown in the label list. These are decoys.
     herb_decoy_labels = ["Nyima", "Odessa", "Perrin", "Sorrel", "Kael"]
+
+    # The label list mixes the real customers with the decoys, shuffled once
+    # so the decoys cannot be told apart by position. The order is fixed for
+    # the whole playthrough.
+    herb_label_order = [order["customer"] for order in herb_orders] + herb_decoy_labels
+    renpy.random.shuffle(herb_label_order)
 
     def make_herb_jars():
         return [{"ingredients": [], "label": None, "sealed": False} for order in herb_orders]
@@ -31,7 +48,37 @@ init python:
     def all_jars_sealed():
         return all(jar["sealed"] for jar in herb_jars)
 
+    def herb_drag_started(drags):
+        # Called when the mouse goes down on a herb drag. The matching name
+        # text is drawn only while this is set, so the art stays clean at rest.
+        global herb_dragging
+        if not drags:
+            return
+        name = drags[0].drag_name
+        if name.startswith("herb_"):
+            herb_dragging = name[5:]
+            renpy.restart_interaction()
+
+    def herb_drag_clicked(drag):
+        global herb_dragging
+        herb_dragging = None
+        renpy.restart_interaction()
+
+    def herb_drag_hovered(herb):
+        global herb_hovered
+        herb_hovered = herb
+        renpy.restart_interaction()
+
+    def herb_drag_unhovered(herb):
+        global herb_hovered
+        if herb_hovered == herb:
+            herb_hovered = None
+        renpy.restart_interaction()
+
     def herb_dragged(drags, drop):
+        global herb_dragging
+        herb_dragging = None
+
         if not drags:
             return
 
@@ -141,12 +188,14 @@ init python:
             renpy.restart_interaction()
 
     def reset_herb_minigame():
-        global herb_jars, herb_prescription_open, herb_labels_open, herb_selected_jar, herb_active_label, herb_label_spawn_serial, herb_mislabeled_clue_found
+        global herb_jars, herb_prescription_open, herb_labels_open, herb_selected_jar, herb_active_label, herb_label_spawn_serial, herb_mislabeled_clue_found, herb_dragging, herb_hovered
         herb_jars = make_herb_jars()
         herb_prescription_open = False
         herb_labels_open = False
         herb_selected_jar = None
         herb_active_label = None
+        herb_dragging = None
+        herb_hovered = None
         # Keep the serial moving forward so a reset cannot reuse a drag position.
         herb_label_spawn_serial += 1
         herb_mislabeled_clue_found = False
@@ -161,149 +210,158 @@ default herb_selected_jar = None
 default herb_active_label = None
 default herb_label_spawn_serial = 0
 default herb_mislabeled_clue_found = False
+default herb_dragging = None
+default herb_hovered = None
+
+
+# The large sheet from paper.png, cropped to its content and reused as the
+# background for the jar options popup.
+image packet_paper = Crop((346, 162, 586, 371), "images/minigame/paper.png")
+
+# A single packet sprite from packet.png, cropped to its content. One is drawn
+# per jar in the minigame.
+image packet = Crop((6, 48, 239, 155), "images/minigame/packet.png")
+
+
+# Every text displayable in the minigame screens uses the Baskerville face.
+# The "herb" style prefix on the screens routes text through these styles.
+style herb_text:
+    font "gui/font/baskervville.regular.ttf"
+
+style herb_button_text:
+    font "gui/font/baskervville.regular.ttf"
 
 
 screen herb_minigame():
 
     modal True
+    style_prefix "herb"
 
-    $ jar_positions = [(410, 205), (570, 205), (730, 205), (490, 390), (650, 390)]
-    add "black"
+    $ jar_positions = [(284, 204), (524, 202), (760, 204), (410, 386), (648, 380)]
+    add "images/minigame/minigame.png"
 
-    textbutton "Prescription":
+    # The prescription book: the closed art is also the button, and the open
+    # art provides the page the checklist is drawn onto.
+    if herb_prescription_open:
+        add "images/minigame/prescription_open.png"
+    else:
+        add "images/minigame/prescription_closed.png"
+
+    imagebutton:
+        idle Solid("#00000000")
+        hover Solid("#00000000" if herb_prescription_open else "#ffffff12")
+        xpos 0
+        ypos 474
+        xsize 318
+        ysize 244
         action ToggleVariable("herb_prescription_open")
-        xpos 25
-        ypos 630
 
     if herb_prescription_open:
-        frame:
-            xpos 25
-            ypos 390
-            xsize 365
-            ysize 230
-            background "#2a222be8"
+        vbox:
+            xpos 70
+            ypos 340
+            xsize 288
+            spacing 8
 
-            vbox:
-                align (0.5, 0.5)
-                spacing 5
-                xfill True
-                text "Checklist" size 21 color "#f5d58a" xalign 0.5
-                text "Match each label to its corresponding herb combination." size 13 color "#c7bdc8" xalign 0.5
+            text "Checklist" size 32 color "#3a2c1e" xalign 0.5 font "gui/font/Orange Lovely.otf"
+            text "Prepare Customer Orders." size 20 color "#5c4a34" xalign 0.5 font "gui/font/Orange Lovely.otf"
+            null height 8
 
-                for prescription_index, prescription in enumerate(herb_orders):
-                    $ order_sealed = any(jar["sealed"] and jar["label"] == prescription["customer"] for jar in herb_jars)
-                    frame:
-                        xsize 335
-                        ysize 29
-                        if order_sealed:
-                            background "#426145"
-                        else:
-                            background "#473b4b"
+            for prescription_index, prescription in enumerate(herb_orders):
+                $ order_sealed = any(jar["sealed"] and jar["label"] == prescription["customer"] for jar in herb_jars)
+                hbox:
+                    spacing 4
 
-                        hbox:
-                            align (0.5, 0.5)
-                            spacing 5
-                            if order_sealed:
-                                text "OK" size 13 color "#c9efaa"
+                    if prescription_index == len(herb_orders) - 1:
+                        textbutton "{s}[prescription['crossed_out_name']]{/s}":
+                            action [SetVariable("herb_mislabeled_clue_found", True), Function(bobcachievement_grant, "mislabeled"), Notify("Clue Found: Mislabeled Name")]
+                            text_size 24
+                            text_font "gui/font/Orange Lovely.otf"
+                            text_color "#080808"
+                            text_hover_color "#c07a2a"
+                            background None
+                            padding (0, 0)
 
-                            if prescription_index == len(herb_orders) - 1:
-                                textbutton "{s}[prescription['crossed_out_name']]{/s}":
-                                    action [SetVariable("herb_mislabeled_clue_found", True), Function(bobcachievement_grant, "mislabeled"), Notify("Clue Found: Mislabeled Name")]
-                                    text_size 15
-                                    text_color "#d8a66d"
-                                    text_hover_color "#fff0ae"
-                                    background None
-                                if order_sealed:
-                                    text "{s}[prescription['customer']] - [', '.join(prescription['herbs'])]{/s}" size 14
-                                else:
-                                    text "[prescription['customer']] - [', '.join(prescription['herbs'])]" size 14
-                            else:
-                                if order_sealed:
-                                    text "{s}[prescription['customer']] - [', '.join(prescription['herbs'])]{/s}" size 14
-                                else:
-                                    text "[prescription['customer']] - [', '.join(prescription['herbs'])]" size 14
+                    if order_sealed:
+                        text "{s}[prescription['customer']] - [', '.join(prescription['herbs'])]{/s}" size 24 color "#6f7a68" yalign 0.5 font "gui/font/Orange Lovely.otf"
+                    else:
+                        text "[prescription['customer']] - [', '.join(prescription['herbs'])]" size 24 color "#241c16" yalign 0.5 font "gui/font/Orange Lovely.otf"
 
 
 
-    # Fixed supply cards remain in place while their draggable copies move.
-    for herb_index, herb in enumerate(herb_supply):
-        frame:
-            xpos 178 + (herb_index * 187)
-            ypos 100
-            xysize (175, 46)
-            background "#496044"
-            text "[herb]":
-                align (0.5, 0.5)
-                size 18
-
-    textbutton "Labels":
-        action ToggleVariable("herb_labels_open")
-        xpos 1120
-        ypos 172
-
+    # The label tab: closed art is the button, open art backs the name list.
     if herb_labels_open:
-        frame:
-            xpos 1060
-            ypos 210
-            xsize 210
-            ysize 300
-            background "#2a222be8"
+        add "images/minigame/label_open.png"
 
-            vbox:
-                align (0.5, 0.5)
-                spacing 6
-                xfill True
+        imagebutton:
+            idle Solid("#00000000")
+            xpos 1054
+            ypos 86
+            xsize 224
+            ysize 502
+            action SetVariable("herb_labels_open", False)
 
-                # Real customer names plus decoys, scrollable when the list
-                # is taller than the panel.
-                viewport:
-                    xsize 186
-                    ysize 205
-                    mousewheel True
-                    scrollbars "vertical"
+        vbox:
+            xpos 1075
+            ypos 190
+            xsize 200
+            spacing 6
 
-                    vbox:
-                        spacing 6
-                        xfill True
+            # Real customer names plus decoys (shuffled once), shown as plain
+            # selectable text.
+            for label_name in herb_label_order:
+                if label_is_assigned(label_name):
+                    text "[label_name] (placed)":
+                        xalign 0.5
+                        size 24
+                        color "#7a6a55"
+                        font "gui/font/Orange Lovely.otf"
+                else:
+                    textbutton "[label_name]":
+                        action Function(spawn_label, label_name)
+                        xalign 0.5
+                        text_size 24
+                        text_font "gui/font/Orange Lovely.otf"
+                        text_color "#241c16"
+                        text_hover_color "#c07a2a"
+                        background None
+                        padding (0, 0)
+    else:
+        add "images/minigame/label_closed.png"
 
-                        $ label_list_names = [order["customer"] for order in herb_orders] + herb_decoy_labels
-                        for label_name in label_list_names:
-                            if label_is_assigned(label_name):
-                                frame:
-                                    xsize 180
-                                    ysize 34
-                                    background "#3c3540"
-                                    text "[label_name] (placed)":
-                                        align (0.5, 0.5)
-                                        size 15
-                                        color "#8f8494"
-                            else:
-                                textbutton "[label_name]":
-                                    action Function(spawn_label, label_name)
-                                    xalign 0.5
-                                    xsize 180
-                                    text_size 16
-                                    text_color "#241c16"
-                                    text_hover_color "#fff0ae"
-                                    background "#d5b56f"
-                                    hover_background "#e8ca86"
+        imagebutton:
+            idle Solid("#00000000")
+            hover Solid("#ffffff12")
+            xpos 1092
+            ypos 160
+            xsize 186
+            ysize 78
+            action SetVariable("herb_labels_open", True)
 
     draggroup:
         for herb_index, herb in enumerate(herb_supply):
+            $ herb_slot_x, herb_slot_y, herb_slot_w, herb_slot_h = herb_slots[herb_index]
             drag:
                 drag_name "herb_" + herb
                 draggable True
                 droppable False
+                activated herb_drag_started
+                clicked herb_drag_clicked
                 dragged herb_dragged
-                xpos 178 + (herb_index * 187)
-                ypos 100
+                hovered Function(herb_drag_hovered, herb)
+                unhovered Function(herb_drag_unhovered, herb)
+                xpos herb_slot_x
+                ypos herb_slot_y
 
                 frame:
-                    xysize (175, 46)
-                    background "#496044"
-                    text "[herb]":
-                        align (0.5, 0.5)
-                        size 18
+                    xysize (herb_slot_w, herb_slot_h)
+                    background None
+                    if herb_dragging == herb or herb_hovered == herb:
+                        text "[herb]":
+                            align (0.5, 0.5)
+                            size 22
+                            color "#fff3cf"
+                            outlines [(2, "#3a2410cc", 0, 0)]
 
         
         if herb_active_label:
@@ -312,8 +370,8 @@ screen herb_minigame():
                 draggable True
                 droppable False
                 dragged label_dragged
-                xpos 890
-                ypos 215
+                xpos 1000
+                ypos 230
 
                 frame:
                     xysize (155, 43)
@@ -335,52 +393,41 @@ screen herb_minigame():
                 ypos jar_y
 
                 frame:
-                    xysize (135, 145)
-                    if jar["sealed"]:
-                        background "#4c7351"
-                    elif jar["label"] and jar_is_correct(jar_index):
-                        background "#768f5a"
-                    else:
-                        background "#9b7653"
+                    xysize (216, 140)
+                    background Frame("packet", 0, 0)
 
                     vbox:
                         align (0.5, 0.5)
-                        spacing 5
-                        text "JAR [jar_index + 1]" size 18 xalign 0.5
+                        spacing 3
                         if jar["sealed"]:
-                            text "SEALED" size 16 color "#f5d58a" xalign 0.5
+                            text "[jar['label']]" size 15 color "#3f6b46" xalign 0.5
                         elif jar["label"]:
-                            text "[jar['label']]" size 17 color "#241c16" xalign 0.5
+                            text "[jar['label']]" size 16 color "#241c16" xalign 0.5
                         else:
-                            text "Unlabeled" size 15 xalign 0.5
+                            text "Unlabeled" size 14 color "#6a5138" xalign 0.5
 
                         if jar["ingredients"]:
                             for ingredient in jar["ingredients"]:
-                                text "• [ingredient]" size 14 xalign 0.5
+                                text "• [ingredient]" size 13 color "#241c16" xalign 0.5
                         else:
-                            text "Empty" size 14 xalign 0.5
-
-                        if not jar["sealed"] and jar["label"]:
-                            if jar_is_correct(jar_index):
-                                text "Ready for tray" size 13 color "#d9f2ab" xalign 0.5
-                            else:
-                                text "Recipe incomplete" size 12 color "#ffd4d4" xalign 0.5
+                            text "Empty" size 13 color "#6a5138" xalign 0.5
 
         drag:
             drag_name "sealing_tray"
             draggable False
             droppable True
-            xpos 510
-            ypos 565
+            xpos 440
+            ypos 548
 
             frame:
-                xysize (260, 58)
-                background "#5f4b39"
+                xysize (430, 170)
+                background None
+                hover_background "#ffffff18"
                 vbox:
                     align (0.5, 0.5)
                     spacing 1
-                    text "SEALING TRAY" size 20 xalign 0.5
-                    text "Drop a correct jar here" size 13 xalign 0.5
+                    text "SEALING TRAY" size 20 xalign 0.5 color "#fff3cf" outlines [(2, "#3a2410cc", 0, 0)]
+                    text "Drop a correct packet here" size 13 xalign 0.5 color "#fff3cf" outlines [(2, "#3a2410cc", 0, 0)]
 
     if all_jars_sealed():
         timer 0.01 action Return(True)
@@ -390,37 +437,50 @@ screen jar_options(jar_index):
 
     modal True
     zorder 100
+    style_prefix "herb"
 
     $ jar = herb_jars[jar_index]
 
     frame:
         xalign 0.5
         yalign 0.5
-        xsize 440
-        ysize 330
-        background "#332b35f2"
+        xsize 586
+        ysize 371
+        background "packet_paper"
 
         vbox:
             align (0.5, 0.5)
-            spacing 12
-            text "Jar [jar_index + 1] options" size 28 xalign 0.5
+            spacing 8
+            text "Jar [jar_index + 1] options" size 24 color "#241c16" xalign 0.5
             if jar["sealed"]:
-                text "This jar is sealed and cannot be changed." size 19 xalign 0.5
+                text "This jar is sealed and cannot be changed." size 16 color "#4a3b2a" xalign 0.5
             else:
                 if jar["ingredients"]:
-                    text "Remove an ingredient:" size 19 xalign 0.5
+                    text "Remove an ingredient/label:" size 16 color "#4a3b2a" xalign 0.5
                     for ingredient in jar["ingredients"]:
                         textbutton "Remove [ingredient]":
                             action Function(remove_jar_herb, jar_index, ingredient)
                             xalign 0.5
+                            text_size 16
+                            text_color "#3a2c1e"
+                            text_hover_color "#8a5a2a"
+                            background None
                 else:
-                    text "This jar has no herbs yet." size 19 xalign 0.5
+                    text "This jar has no herbs yet." size 16 color "#4a3b2a" xalign 0.5
 
                 if jar["label"]:
                     textbutton "Remove [jar['label']] label":
                         action Function(remove_jar_label, jar_index)
                         xalign 0.5
+                        text_size 16
+                        text_color "#3a2c1e"
+                        text_hover_color "#8a5a2a"
+                        background None
 
             textbutton "Close":
                 action Hide("jar_options")
                 xalign 0.5
+                text_size 17
+                text_color "#3a2c1e"
+                text_hover_color "#8a5a2a"
+                background None

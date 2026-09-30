@@ -19,6 +19,11 @@ transform not_talking:
     matrixcolor SaturationMatrix(0.4)
 
 
+transform ending_drift:
+    zoom 1.0
+    linear 35.0 zoom 1.14
+
+
 
 # images.
 image yun neutral = Transform("images/sprites/yun_neutral.png", ysize =590, fit ="contain")
@@ -36,6 +41,7 @@ image location_map = "images/BG/shop.png"
 image mortuary = "images/BG/mortuary.png"
 image pharmacy = "images/BG/pharmacy.png"
 image office = "images/BG/office.png"
+image true_end = "images/CG/true end.png"
 
 init python:
     def make_speaker_focus(active_tag):
@@ -942,7 +948,7 @@ label mortuary:
     narrator "Yun is alone now, drifting between dream and waking. The barrier is weaker here than it’s been all day."
     narrator "He can’t help but whisper to himself. Reassurance mostly."
     show yun soft
-    yun '"Still. Everything is still when the work is done.I’ll leave it here… at least for now.'
+    yun '"Still. Everything is still when the work is done. I’ll leave it here… at least for now.'
     yun '"I carry the weight, but not the burden."'
     hide yun
     narrator "The stairs are shorter than they were coming back down. He doesn’t stop to think why."
