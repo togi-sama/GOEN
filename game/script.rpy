@@ -20,8 +20,15 @@ transform not_talking:
 
 
 transform ending_drift:
+    align (0.5, 0.5)
+    subpixel True
     zoom 1.0
-    linear 35.0 zoom 1.14
+    xalign 0.30
+    block:
+        ease 30.0 zoom 1.10 xalign 0.70
+        ease 30.0 zoom 1.0 xalign 0.30
+        repeat
+    
 
 
 
@@ -42,6 +49,8 @@ image mortuary = "images/BG/mortuary.png"
 image pharmacy = "images/BG/pharmacy.png"
 image office = "images/BG/office.png"
 image true_end = "images/CG/true end.png"
+image bad_end = "images/CG/bad end.png"
+image stale_end = "images/CG/stale end.png"
 
 init python:
     def make_speaker_focus(active_tag):
@@ -112,7 +121,7 @@ define nestor = Character(
 
 image splash_anim_1:
 
-    "gui/renpy-logo.png"
+    "gui/fermata icon.png"
     xalign 0.5 yalign 0.5 alpha 0.0
     ease_quad 7.0 alpha 1.0 zoom 2.0
 
@@ -124,10 +133,6 @@ label splashscreen:
 
     ## Here begins our splashscreen animation.
     show splash_anim_1
-    show text "{size=60}Made with Ren'Py [renpy.version_only]{/s}":
-        xalign 0.5 yalign 0.8 alpha 0.0
-        pause 6.0
-        linear 1.0 alpha 1.0
     
     ## The first time the game is launched, players cannot skip the animation.
     if not persistent.seen_splash:
@@ -491,6 +496,8 @@ label PI:
     scene black
     with fade
 
+    play music "audio/music/Break of Day.mp3" fadein 1.0 fadeout 1.0 loop
+
     narrator "The stairs to the PI office share a landing with the stairs that lead down the mortuary. The building’s never cared to separate the living from what awaits."
     narrator "Yun walks to meet the stairwell, feeling the cool chill coming from the mortuary’s stairs, then up to the second floor."
     narrator "The air is somehow always warmer around the door to Dan’s office."
@@ -768,6 +775,9 @@ label mortuary:
     with fade
     show nestor smiling at left
     with dissolve
+
+    play music "audio/music/Distance Harp.mp3" fadein 1.0 fadeout 1.0 loop
+
     nestor '"-there you are. I’ll need your hands today."'
     show yun neutral 
     narrator "Yun nods."

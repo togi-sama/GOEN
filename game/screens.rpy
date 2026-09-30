@@ -77,6 +77,14 @@ style frame:
     background Frame("gui/frame.png", gui.frame_borders, tile=gui.frame_tile)
 
 
+style about_text is gui_text:
+    font "gui/font/baskervville.regular.ttf"
+    size 26
+    color "#ffffff"
+    line_spacing 4
+
+
+
 
 ################################################################################
 ## In-game screens
@@ -929,7 +937,9 @@ style about_label_text is gui_label_text
 style about_text is gui_text
 
 style about_label_text:
-    size gui.label_text_size
+    size 40
+    font "gui/font/baskervville.regular.ttf"
+    color "#d88200"
 
 
 ## Load and Save screens #######################################################
@@ -1336,45 +1346,6 @@ screen history():
 
         ## No Return button -- history.png is a right-hand panel, and ESC (or
         ## the quick menu's History button) closes this screen.
-
-### The old version of the History screen, just for reference.
-# screen history():
-
-#     tag menu
-
-#     ## Avoid predicting this screen, as it can be very large.
-#     predict False
-
-#     use game_menu(_("History"), scroll=("vpgrid" if gui.history_height else "viewport"), yinitial=1.0):
-
-#         style_prefix "history"
-
-#         for h in _history_list:
-
-#             window:
-
-#                 ## This lays things out properly if history_height is None.
-#                 has fixed:
-#                     yfit True
-
-#                 if h.who:
-
-#                     label h.who:
-#                         style "history_name"
-#                         substitute False
-
-#                         ## Take the color of the who text from the Character, if
-#                         ## set.
-#                         if "color" in h.who_args:
-#                             text_color h.who_args["color"]
-
-#                 $ what = renpy.filter_text_tags(h.what, allow=gui.history_allow_tags)
-#                 text what:
-#                     substitute False
-
-#         if not _history_list:
-#             label _("The dialogue history is empty.")
-
 
 ## This determines what tags are allowed to be displayed on the history screen.
 

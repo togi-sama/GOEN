@@ -1,11 +1,5 @@
 ## Ending route and flag logic for GOEN.
 ##
-## Two axes are tracked across the run:
-##
-##   route_acknowledge - Yun admits, engages with, or asks for help about the
-##                        dreams. He stops carrying them alone.
-##   route_pursue      - Yun chases the case: the crossed-out name, the
-##                        bracelet, the things moving on their own.
 ##
 ## Placing flags: drop a single call into the menu branch you want to count.
 ##
@@ -208,6 +202,10 @@ label ending_a:
 
     call ending_prologue("a")
 
+    play music "audio/music/short_Hes_Gone_master.mp3"
+
+    scene bad_end at ending_drift with slowdissolve
+
     narrator "By the time he’s home, the day’s hold on him doesn’t slip."
     narrator "He doesn’t remember lying down. He rarely does anymore. The barrier between going to sleep and waiting for it to arrive has thinned that he can no longer notice when he crosses."
     nestor '"Yun"'
@@ -229,6 +227,8 @@ label ending_b:
 
     call ending_prologue("b")
 
+    play music "audio/music/Gentle Breeze HarpFIXED.mp3"
+
     scene true_end at ending_drift with slowdissolve
 
 
@@ -246,6 +246,7 @@ label ending_b:
     narrator "And Yun stays awake."
 
     scene black with slowfade
+    stop music fadeout 1.0
 
     return
 
@@ -255,6 +256,10 @@ label ending_b:
 label ending_c:
 
     call ending_prologue("c")
+
+    play music "audio/music/old city theme.ogg"
+    
+    scene stale_end at ending_drift with slowdissolve
 
     narrator "By the time he’s home, the day’s hold on him slowly starts to slip. There’s no thinking back on it. He closes his eyes."
     narrator "He doesn’t remember lying down. And there’s nothing strange in that, most nights go the same way and this doesn’t ask to be different."

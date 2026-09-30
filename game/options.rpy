@@ -13,7 +13,7 @@
 ##
 ## The _() surrounding the string marks it as eligible for translation.
 
-define config.name = _("GOEN")
+define config.name = _("Here Fermata")
 
 
 ## Determines if the title given above is shown on the main menu screen. Set
@@ -24,26 +24,22 @@ define gui.show_name = True
 
 ## The version of the game.
 ### Please remember to change this for your game!
-define config.version = "2.7"
+define config.version = "1.0"
 
 
 ## Text that is placed on the game's about screen. Place the text between the
 ## triple-quotes, and leave a blank line between paragraphs.
 
-define gui.about = _p("""This Ren'Py GUI Template was put together by BáiYù with additional
-    code by {a=https://bobcgames.itch.io/}bobcgames{/a}, {a=https://twitter.com/theominute}TheoMinute{/a} and {a=https://npckc.itch.io}npckc{/a}.
-    This release is under a {a=https://opensource.org/licenses/MIT}MIT license{/a},
-    meaning you may modify and use this code in any games you make, even
-    commercial ones. You do not to need to ask permission from me, bobcgames, minute, or npckc
-    to use the code in this project, though credit to us all is highly appreciated. If you wish to use the visual and audio
-    assets in your game, please refer to those individual licenses.
-    \nEileen Sprite made with {a=https://ar14.itch.io/mannequin}Mannequin by AR14{/a}
-    \nBackgrounds made by {a=https://lemmasoft.renai.us/forums/viewtopic.php?f=52&t=17302}mugenjohncel{/a}
-    \nMusic composed by {a=https://soundimage.org/}Eric Matyas{/a}
-    \nIf you'd like to see more free Ren'Py codes and GUIs in the future or
-    support the other things I do, consider leaving a tip on the itch.io page!
-    \nThis template was last updated on May 25, 2024, tested on both Ren'Py Version 7.7.1 and Version 8.2.1.
-    \n(From here on, it's the boilerplate text that's in screens.rpy!)
+define gui.about = _p("""{color=#d88200}Art and Story by:{/color} yisan131 
+\n {color=#d88200}Programmer:{/color} togi-sama
+
+\n {color=#d88200}Special Thanks to:{/color}
+\n Trevor Lentz, remaxim and Harold Azmed for the music
+\n All in One GUI Template
+\n GuiManipulate by brunoais
+\n Transforms list by Otojang
+\n {color=#d88200}And to all the players, Thank you for checking out our game!{color=#d88200}
+
 """)
 
 ## A short name for the game used for executables and directories in the built
@@ -75,7 +71,7 @@ define config.has_voice = True
 ## the player is at the main menu. This file will continue playing into the
 ## game, until it is stopped or another file is played.
 
-#define config.main_menu_music = concrete
+define config.main_menu_music = "audio/music/palm of my hand - at the altar.ogg"
 
 
 ## Transitions #################################################################
@@ -182,7 +178,7 @@ define config.save_directory = "AIOGUITemplate-1658355779"
 ##
 ## The icon displayed on the taskbar or dock.
 
-define config.window_icon = "gui/window_icon.png"
+define config.window_icon = "gui/fermata icon.png"
 
 
 ## Build configuration #########################################################
