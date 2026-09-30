@@ -291,6 +291,8 @@ label start:
     narrator "For if the voice were to speak to him in the darkness he would have nothing to give but the losing."
     narrator "Someone stands just past where the light reaches."
     narrator "He doesn't try to see her clearly. Some things, in dreams, are better left at the edge."
+    narrator "In her hands, a bracelet."
+    narrator "Small enough to be held dearly between fingers, the light catching on its jade."
 
     scene room at grayscale
 
@@ -474,6 +476,7 @@ label start:
     narrator "Nestor doesn’t read the ledger. He closes it and hands it to Yun’s firm grasp. If he was uneasy, Yun couldn’t tell."
     narrator "Nestor always liked to keep the pharmacy tidy, the clutter predictable."
     narrator "But lately, things seem to move when no one’s looking."
+    nestor '"Do come downstairs as soon as you can, Yun."'
     narrator "Yun nods and turns toward the stairwell. As he passes, the cat continues its motion, patient and unblinking. It will still be there when he returns. It always is."
 
     jump shop_loop
@@ -947,7 +950,7 @@ label mortuary:
     show yun neutral
     narrator "Yun is alone now, drifting between dream and waking. The barrier is weaker here than it’s been all day."
     narrator "He can’t help but whisper to himself. Reassurance mostly."
-    show yun soft
+    show yun closed
     yun '"Still. Everything is still when the work is done. I’ll leave it here… at least for now.'
     yun '"I carry the weight, but not the burden."'
     hide yun
