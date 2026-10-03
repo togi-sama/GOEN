@@ -122,40 +122,24 @@ define nestor = Character(
 image splash_anim_1:
 
     "gui/fermata icon.png"
-    xalign 0.5 yalign 0.5 alpha 0.0
-    ease_quad 7.0 alpha 1.0 zoom 2.0
-
-default persistent.seen_splash = False
+    xalign 0.5 yalign 0.5
 
 label splashscreen:
-    
+
     scene black
 
-    ## Here begins our splashscreen animation.
+    ## Brief black lead-in before the icon pops in.
+    pause 0.5
+
+    ## play sound (not music) so the meow plays exactly once instead of looping.
+    play sound "audio/sfx/Meow.ogg"
     show splash_anim_1
-    
-    ## The first time the game is launched, players cannot skip the animation.
-    if not persistent.seen_splash:
-        
-        ## No input will be detected for the set time stated.
-        ## Set this to be a little longer than how long the animation takes.
-        $ renpy.pause(8.5, hard=True)
- 
-        $ persistent.seen_splash = True
-    
-    ## Players can skip the animation in subsequent launches of the game.
-    else:
- 
-        if renpy.pause(8.5):
- 
-            jump skip_splash
 
-    scene black
-    with fade
- 
-    label skip_splash:
- 
-        pass
+    ## Hold the icon for the length of the meow, then fade out.
+    $ renpy.pause(renpy.music.get_duration("sound") or 0.5)
+
+    hide splash_anim_1
+    with Dissolve(0.5)
 
     return
 
@@ -261,7 +245,7 @@ label start:
     achieve beginning
 
     scene room at grayscale, opening_blur
-    play music dream fadein 1.0 fadeout 1.0 loop
+    play music "audio/music/cave themeb4.ogg" fadein 1.0 fadeout 1.0 loop
 
     show expression "gui/vignette.png" as opening_vignette at heavy_vignette
 
@@ -332,7 +316,7 @@ label start:
     stop music fadeout 1.0
 
     scene pharmacy with Fade(0.5, 0.5, 1.0)
-    play music pharmacy fadein 1.0 fadeout 1.0 loop
+    play music "audio/music/Glowing Clouds.ogg" fadein 1.0 fadeout 1.0 loop
 
     narrator "It is the sheep hour. He wondered when he had fallen asleep."
 
@@ -496,12 +480,13 @@ label PI:
     scene black
     with fade
 
-    play music "audio/music/Break of Day.mp3" fadein 1.0 fadeout 1.0 loop
+    play music "audio/music/Break of Day.ogg" fadein 1.0 fadeout 1.0 loop
 
     narrator "The stairs to the PI office share a landing with the stairs that lead down the mortuary. The building’s never cared to separate the living from what awaits."
     narrator "Yun walks to meet the stairwell, feeling the cool chill coming from the mortuary’s stairs, then up to the second floor."
     narrator "The air is somehow always warmer around the door to Dan’s office."
     narrator "Yun glances at the documents in his hand. The ink is fresh, as if re-written. He remembers placing these in Dan’s desk. Or did he dream that too?"
+    play sound "audio/sfx/door_knock.ogg"
     narrator "{b}(Knocks){/b}"
     dan '"If that’s you, Yun, the door’s open. Unless you’re here to peddle, then it’s locked."'
     yun '"There’s been a mix-up. You left your reports in the pharmacy."'
@@ -776,7 +761,7 @@ label mortuary:
     show nestor smiling at left
     with dissolve
 
-    play music "audio/music/Distance Harp.mp3" fadein 1.0 fadeout 1.0 loop
+    play music "audio/music/Distance Harp.ogg" fadein 1.0 fadeout 1.0 loop
 
     nestor '"-there you are. I’ll need your hands today."'
     show yun neutral 

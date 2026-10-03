@@ -12,6 +12,7 @@ init offset = -1
 style default:
     properties gui.text_properties()
     language gui.language
+    size 20
 
 style input:
     properties gui.text_properties("input", accent=True)
@@ -126,6 +127,8 @@ screen cinematic_bars():
 
 define centered = Character(None, window_background=None)
 
+default persistent.textbox_opacity = 1.0
+
 screen say(who, what):
     style_prefix "say"
 
@@ -136,7 +139,7 @@ screen say(who, what):
 
     window:
 
-        add Transform("gui/green.png", yzoom=0.4, yoffset=-140, alpha = 1.0)
+        add Transform("gui/green.png", yzoom=0.4, yoffset=-140, alpha = persistent.textbox_opacity)
 
         ## The window background is held by this Transform rather than by the
         ## window's own style, so its alpha is set here.
@@ -199,6 +202,7 @@ style say_label:
 style say_dialogue:
     properties gui.text_properties("dialogue")
     font "gui/font/baskervville.regular.ttf"
+    size gui.text_size
     xpos gui.dialogue_xpos
     xsize gui.dialogue_width
     ypos gui.dialogue_ypos
@@ -1126,6 +1130,13 @@ screen preferences():
                     textbutton _("After Choices") action Preference("after choices", "toggle")
                     textbutton _("Transitions") action InvertSelected(Preference("transitions", "toggle"))
 
+                vbox:
+                    style_prefix "radio"
+                    label _("Text Size")
+                    textbutton _("Small") action gui.SetPreference("size", 16)
+                    textbutton _("Regular") action gui.SetPreference("size", 20)
+                    textbutton _("Large") action gui.SetPreference("size", 26)
+
                 ## Custom Preferences here. Additional vboxes of type
                 ## "radio" or "check" can be added to add creator-defined
                 ## preferences.
@@ -1171,6 +1182,13 @@ screen preferences():
                         textbutton _("Mute All"):
                             action Preference("all mute", "toggle")
                             style "mute_all_button"
+
+
+                vbox:
+
+                    label _("Text Box Opacity")
+
+                    bar value FieldValue(persistent, "textbox_opacity", range=1.0)
 
 
 style pref_label is gui_label

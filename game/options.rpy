@@ -46,7 +46,7 @@ define gui.about = _p("""{color=#d88200}Art and Story by:{/color} yisan131
 ## distribution. This must be ASCII-only, and must not contain spaces, colons,
 ## or semicolons.
 
-define build.name = "AIO-GUI-Template"
+define build.name = "Here-Fermata"
 
 
 ## Sounds and music ############################################################
@@ -214,14 +214,19 @@ init python:
 
     ## To archive files, classify them as 'archive'.
 
-    # build.classify('game/**.png', 'archive')
-    # build.classify('game/**.jpg', 'archive')
-    # build.classify('game/**.webp', 'archive')
-    # build.classify('game/**.webm', 'archive')
-    # build.classify('game/**.ogg', 'archive')
-    # build.classify('game/**.mp3', 'archive')
-    # build.classify('game/**.rpy', 'archive')
-    # build.classify('game/**.rpyc', 'archive')
+    build.archive("archive", "all")
+
+    build.classify('game/**.png', 'archive')
+    build.classify('game/**.jpg', 'archive')
+    build.classify('game/**.webp', 'archive')
+    build.classify('game/**.webm', 'archive')
+    build.classify('game/**.ogg', 'archive')
+    build.classify('game/**.mp3', 'archive')
+    build.classify('game/**.rpy', 'archive')
+    build.classify('game/**.rpyc', 'archive')
+    build.classify("game/**.rpy", None)
+    build.classify("game/**", "archive")
+
 
     ## Files matching documentation patterns are duplicated in a mac app build,
     ## so they appear in both the app and the zip file.

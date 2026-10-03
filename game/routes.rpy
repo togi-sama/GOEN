@@ -200,9 +200,9 @@ label ending_prologue(ending_id):
 ## Ending A -- Pursue dominant, mislabeled clue found.
 label ending_a:
 
-    call ending_prologue("a")
+    call ending_prologue("a") from _call_ending_prologue
 
-    play music "audio/music/short_Hes_Gone_master.mp3"
+    play music "audio/music/short_Hes_Gone_master.ogg"
 
     scene bad_end at ending_drift with slowdissolve
 
@@ -225,9 +225,9 @@ label ending_a:
 ## Ending B -- Acknowledge dominant.
 label ending_b:
 
-    call ending_prologue("b")
+    call ending_prologue("b") from _call_ending_prologue_1
 
-    play music "audio/music/Gentle Breeze HarpFIXED.mp3"
+    play music "audio/music/Gentle Breeze HarpFIXED.ogg"
 
     scene true_end at ending_drift with slowdissolve
 
@@ -255,7 +255,7 @@ label ending_b:
 ## ROUTE_FALLBACK case, so this is where every unclassified run lands.
 label ending_c:
 
-    call ending_prologue("c")
+    call ending_prologue("c") from _call_ending_prologue_2
 
     play music "audio/music/old city theme.ogg"
     

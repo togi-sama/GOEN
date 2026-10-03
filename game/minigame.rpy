@@ -188,7 +188,7 @@ init python:
             renpy.restart_interaction()
 
     def reset_herb_minigame():
-        global herb_jars, herb_prescription_open, herb_labels_open, herb_selected_jar, herb_active_label, herb_label_spawn_serial, herb_mislabeled_clue_found, herb_dragging, herb_hovered
+        global herb_jars, herb_prescription_open, herb_labels_open, herb_selected_jar, herb_active_label, herb_label_spawn_serial, herb_mislabeled_clue_found, herb_dragging, herb_hovered, herb_checklist_hovered, herb_labels_hovered
         herb_jars = make_herb_jars()
         herb_prescription_open = False
         herb_labels_open = False
@@ -196,6 +196,8 @@ init python:
         herb_active_label = None
         herb_dragging = None
         herb_hovered = None
+        herb_checklist_hovered = False
+        herb_labels_hovered = False
         # Keep the serial moving forward so a reset cannot reuse a drag position.
         herb_label_spawn_serial += 1
         herb_mislabeled_clue_found = False
@@ -212,6 +214,8 @@ default herb_label_spawn_serial = 0
 default herb_mislabeled_clue_found = False
 default herb_dragging = None
 default herb_hovered = None
+default herb_checklist_hovered = False
+default herb_labels_hovered = False
 
 
 # The large sheet from paper.png, cropped to its content and reused as the
@@ -255,6 +259,17 @@ screen herb_minigame():
         xsize 318
         ysize 244
         action ToggleVariable("herb_prescription_open")
+        hovered SetVariable("herb_checklist_hovered", True)
+        unhovered SetVariable("herb_checklist_hovered", False)
+
+    if herb_checklist_hovered and not herb_prescription_open:
+        text "Checklist":
+            xcenter 110
+            ycenter 596
+            size 34
+            color "#fff3cf"
+            outlines [(3, "#3a2410cc", 0, 0)]
+            font "gui/font/Orange Lovely.otf"
 
     if herb_prescription_open:
         vbox:
@@ -337,6 +352,17 @@ screen herb_minigame():
             xsize 186
             ysize 78
             action SetVariable("herb_labels_open", True)
+            hovered SetVariable("herb_labels_hovered", True)
+            unhovered SetVariable("herb_labels_hovered", False)
+
+        if herb_labels_hovered and not herb_labels_open:
+            text "Labels":
+                xcenter 1185
+                ycenter 199
+                size 34
+                color "#fff3cf"
+                outlines [(3, "#3a2410cc", 0, 0)]
+                font "gui/font/Orange Lovely.otf"
 
     draggroup:
         for herb_index, herb in enumerate(herb_supply):
